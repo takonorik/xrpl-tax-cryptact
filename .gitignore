@@ -1,0 +1,6 @@
+# Personal data must never be committed: exported settings (wallets, token settings, address book) and tax CSVs
+*.json
+*.csv
+.DS_Store
+.claude/
+_site/

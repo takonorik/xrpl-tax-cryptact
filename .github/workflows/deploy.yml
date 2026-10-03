@@ -1,0 +1,46 @@
+name: Deploy
+
+# main へのpushや手動実行（Actions → Run workflow）で GitHub Pages に公開する。
+#
+# 限定公開の切り替えは GitHub の設定だけで行う（コードの変更は不要）:
+#   Settings → Secrets and variables → Actions
+#     Secrets   ACCESS_CODE = アクセスコード
+#     Variables ACCESS_GATE = on / off
+#   変更後は Actions → Deploy → Run workflow で反映する
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# 権限はジョブごとに必要な分だけ与える
+permissions: {}
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write           # GitHub Pages への公開に必要
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Build site
+        env:
+          ACCESS_GATE: ${{ vars.ACCESS_GATE }}
+          ACCESS_CODE: ${{ secrets.ACCESS_CODE }}
+        run: python3 scripts/build_site.py _site
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4

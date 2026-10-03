@@ -1,0 +1,2125 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XRPL Tax for Cryptact</title>
+<meta name="theme-color" content="#4A4FBE">
+<script>document.documentElement.classList.add("gate-check")</script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect x=%224%22 y=%221.5%22 width=%2224%22 height=%2229%22 rx=%226%22 fill=%22%234A4FBE%22/%3E%3Crect x=%228%22 y=%225.5%22 width=%2216%22 height=%227%22 rx=%222%22 fill=%22%23fff%22/%3E%3Cg fill=%22%23fff%22%3E%3Crect x=%228%22 y=%2215.5%22 width=%224.4%22 height=%224%22 rx=%221.2%22/%3E%3Crect x=%2213.8%22 y=%2215.5%22 width=%224.4%22 height=%224%22 rx=%221.2%22/%3E%3Crect x=%2219.6%22 y=%2215.5%22 width=%224.4%22 height=%224%22 rx=%221.2%22/%3E%3Crect x=%228%22 y=%2221.5%22 width=%224.4%22 height=%224%22 rx=%221.2%22/%3E%3Crect x=%2213.8%22 y=%2221.5%22 width=%224.4%22 height=%224%22 rx=%221.2%22/%3E%3Crect x=%2219.6%22 y=%2221.5%22 width=%224.4%22 height=%224%22 rx=%221.2%22/%3E%3C/g%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&family=Noto+Sans+JP:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --brand:#4A4FBE;--brand-deep:#343896;--brand-soft:#E4E5F9;--brand-tint:#F2F3FD;
+  --bg:#F5F5F8;--surface:#FFFFFF;--text:#151515;--muted:#6B6B7B;--line:#151515;--field:#F2F3FD;
+  --shadow:#151515;--btn-bg:#151515;--btn-fg:#FFFFFF;
+  --hero-bg:radial-gradient(circle at 88% 6%,#8E92E8 0,transparent 44%),radial-gradient(circle at 4% 100%,#C7C9F4 0,transparent 46%),#E4E5F9;--hero-text:#151515;--hero-sub:#3A3A48;
+  --buy:#0F7B57;--sell:#D6455A;--mint:#7A55D6;--other:#5A5A6E;--warn:#B3134A;
+  --sans:'Inter','Noto Sans JP',sans-serif;--mono:'JetBrains Mono',monospace;
+}
+@media (prefers-color-scheme:dark){:root{
+  --brand:#8A8FF5;--brand-deep:#6C71E0;--brand-soft:#2B2D52;--brand-tint:#1E2036;
+  --bg:#111219;--surface:#1B1C26;--text:#ECECF2;--muted:#9C9CB0;--line:#ECECF2;--field:#232432;
+  --shadow:#4A4FBE;--btn-bg:#5C61D6;--btn-fg:#FFFFFF;
+  --hero-bg:radial-gradient(circle at 88% 6%,rgba(74,79,190,.85) 0,transparent 46%),radial-gradient(circle at 4% 100%,rgba(138,143,245,.32) 0,transparent 44%),#1A1B2C;--hero-text:#F3F3F8;--hero-sub:#C3C4D6;
+  --buy:#4ADE9B;--sell:#F87186;--mint:#B197FC;--other:#9BA0B5;--warn:#FBBF24;
+}}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;-webkit-font-smoothing:antialiased}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+/* app bar */
+.appbar{position:sticky;top:0;z-index:30;background:color-mix(in srgb,var(--bg) 84%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-bottom:2px solid var(--line)}
+.appbar-in{max-width:1180px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:12px}
+.brand{display:flex;align-items:center;gap:8px;font-weight:900;font-size:1.15rem;letter-spacing:-.03em;flex:1;min-width:0}
+.brand b{color:var(--brand)}
+.tagline{font-size:.62rem;font-weight:900;letter-spacing:.08em;border:2px solid var(--line);border-radius:99px;padding:1px 8px;background:var(--surface);white-space:nowrap}
+
+/* hero */
+.hero{background:var(--hero-bg);border-radius:0 0 36px 36px;padding:26px 16px 84px}
+.hero-in{max-width:1180px;margin:0 auto}
+.catch{font-size:clamp(1.4rem,4.4vw,1.95rem);font-weight:900;line-height:1.35;letter-spacing:-.01em;color:var(--hero-text)}
+.catch em{font-style:normal;background:var(--brand);color:#fff;padding:0 .3em;border-radius:8px}
+a.lead-link{}
+.lead a{color:var(--brand);font-weight:800}
+.lead{font-size:.8rem;font-weight:500;color:var(--hero-sub);margin-top:8px;line-height:1.7}
+
+/* layout */
+.wrap{max-width:1180px;margin:0 auto;padding:0 16px 80px}
+.layout{display:block}
+.panel{position:relative;margin-top:-60px;background:var(--surface);border:2px solid var(--line);border-radius:26px;padding:18px;box-shadow:6px 6px 0 var(--shadow)}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.field{background:var(--field);border-radius:16px;padding:10px 14px;border:2px solid transparent;transition:border-color .15s;min-width:0;margin-bottom:10px}
+.field:focus-within,.field:hover{border-color:var(--brand)}
+label.lbl{display:block;font-size:.66rem;font-weight:800;color:var(--brand);margin-bottom:5px}
+.field input{width:100%;border:0;background:transparent;color:var(--text);font:700 1rem var(--mono);outline:none}
+.field input::placeholder{color:var(--muted);opacity:.6}
+.opt-row{display:flex;align-items:flex-start;gap:8px;margin-top:10px;font-size:.76rem;font-weight:700;cursor:pointer;line-height:1.5}
+.opt-row input{margin-top:3px;accent-color:var(--brand);flex-shrink:0;width:16px;height:16px}
+.btn{width:100%;padding:15px;margin-top:14px;background:var(--btn-bg);color:var(--btn-fg);border:2px solid var(--line);border-radius:16px;font:900 .95rem var(--sans);cursor:pointer;transition:transform .1s,box-shadow .1s}
+.btn:hover{box-shadow:4px 4px 0 var(--brand)}
+@media (prefers-color-scheme:dark){.btn:hover{box-shadow:4px 4px 0 var(--line)}}
+.btn:active{transform:translate(2px,2px);box-shadow:none}
+.btn:disabled{opacity:.7;cursor:wait}
+.btn.stop{background:var(--sell);border-color:var(--line);color:#fff}
+.btn.ghost{width:auto;margin:0;padding:9px 14px;background:var(--surface);color:var(--text);font-size:.76rem;border-radius:12px;box-shadow:3px 3px 0 var(--shadow)}
+.btn.ghost:hover{box-shadow:3px 3px 0 var(--brand)}
+.btn.ghost:active{transform:translate(2px,2px);box-shadow:none}
+#status,.status{font-size:.72rem;font-weight:700;color:var(--muted);margin-top:12px;font-family:var(--mono);line-height:1.6;min-height:1.2em}
+#status.err,.status.err{color:var(--sell)}
+
+/* results */
+.results{display:none;margin-top:28px}
+.rh{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 4px 12px}
+.rt{font-size:1.05rem;font-weight:900}
+.rc{font-size:.8rem;font-weight:800;color:var(--brand)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px}
+.stat{background:var(--surface);border:2px solid var(--line);border-radius:16px;padding:12px 14px;box-shadow:3px 3px 0 var(--shadow)}
+.stat small{display:block;font-size:.64rem;font-weight:800;color:var(--muted)}
+.stat b{display:block;font:900 1.15rem var(--mono);margin-top:3px}
+.stat .sub{font-size:.68rem;font-weight:700;color:var(--brand);font-family:var(--mono)}
+.toolbar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.filter{font-size:.72rem;font-weight:800;padding:6px 13px;border-radius:99px;border:2px solid var(--line);background:var(--surface);color:var(--muted);cursor:pointer;user-select:none}
+.filter:hover{border-color:var(--brand);color:var(--brand)}
+.filter.on{background:var(--brand);border-color:var(--brand);color:#fff}
+.csvrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.csvrow small{font-size:.68rem;font-weight:700;color:var(--muted)}
+.helplinks{display:flex;gap:6px 12px;flex-wrap:wrap;align-items:center;margin:0 2px 16px;font-size:.72rem;font-weight:800}
+.helplinks span{color:var(--muted)}
+.helplinks a{color:var(--brand);text-decoration:none}
+.helplinks a:hover{text-decoration:underline}
+
+/* transaction card */
+.vlist{display:flex;flex-direction:column;gap:14px}
+.tx{background:var(--surface);border:2px solid var(--line);border-radius:22px;box-shadow:5px 5px 0 var(--shadow);overflow:hidden}
+.tx.done{opacity:.45;box-shadow:none}
+.tx-head{display:flex;align-items:center;gap:9px;padding:12px 14px;flex-wrap:wrap;border-bottom:2px dashed var(--brand-soft)}
+.badge{font-size:.68rem;font-weight:900;letter-spacing:.03em;padding:4px 11px;border-radius:99px;border:2px solid var(--line);color:#fff}
+.b-buy{background:var(--buy)}.b-sell{background:var(--sell)}.b-mint{background:var(--mint)}.b-other{background:var(--other)}
+.cafe{font-size:.62rem;font-weight:900;border:2px solid var(--brand);color:var(--brand);border-radius:99px;padding:2px 9px}
+.tx-head .when{font:700 .76rem var(--mono)}
+.tx-head .spacer{flex:1}
+.tx-head a.txlink{font-size:.7rem;font-weight:800;color:var(--brand);text-decoration:none}
+.tx-head a.txlink:hover{text-decoration:underline}
+.chk{display:flex;align-items:center;gap:5px;font-size:.7rem;font-weight:800;color:var(--muted);cursor:pointer}
+.chk input{accent-color:var(--brand);width:15px;height:15px}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1px;background:var(--brand-soft)}
+.f{background:var(--surface);padding:9px 14px;cursor:pointer;position:relative}
+.f:hover{background:var(--brand-tint)}
+.f .k{font-size:.62rem;font-weight:800;color:var(--muted)}
+.f .v{font:700 .82rem var(--mono);word-break:break-all;margin-top:2px}
+.f.copied::after{content:'コピーしました';position:absolute;right:10px;top:8px;font:800 .6rem var(--sans);color:var(--brand)}
+.f.acq{cursor:default}
+.f.wide{grid-column:1/-1}
+.acq-link{font:800 .78rem var(--sans);color:var(--brand)}
+.note{padding:9px 14px;font-size:.7rem;font-weight:600;color:var(--muted);line-height:1.6;background:var(--brand-tint);border-top:2px dashed var(--brand-soft)}
+.note .w{color:var(--warn);font-weight:800}
+.none-msg{color:var(--muted);font-size:.85rem;font-weight:700;padding:24px 0;text-align:center}
+
+/* help */
+.help{margin-top:24px;background:var(--surface);border:2px solid var(--line);border-radius:22px;padding:16px 18px;box-shadow:5px 5px 0 var(--shadow)}
+.help summary{cursor:pointer;font-weight:900;font-size:.9rem;list-style:none}
+.help summary::-webkit-details-marker{display:none}
+.help summary::after{content:' ▸';color:var(--brand)}
+.help[open] summary::after{content:' ▾'}
+.help ul{list-style:none;margin-top:10px;display:flex;flex-direction:column;gap:7px}
+.help li{font-size:.76rem;font-weight:500;color:var(--muted);line-height:1.75;padding-left:18px;position:relative}
+.help li::before{content:"→";position:absolute;left:0;color:var(--brand);font-weight:900}
+.help b{color:var(--text);font-weight:800}
+code{font:700 .72rem var(--mono);background:var(--brand-soft);color:var(--text);padding:1px 5px;border-radius:5px}
+
+@media(min-width:1024px){
+  .layout{display:grid;grid-template-columns:400px minmax(0,1fr);gap:32px;align-items:start}
+  .layout>.panel{position:sticky;top:78px;max-height:calc(100vh - 96px);overflow:auto}
+  .layout>.panel .grid2{grid-template-columns:minmax(0,1fr)}
+  .col-results{min-width:0;margin-top:-60px}
+  .results{margin-top:0}
+}
+@media(max-width:540px){.grid2{grid-template-columns:minmax(0,1fr)}.panel{padding:14px}}
+
+[hidden]{display:none!important}
+.tabs{display:flex;gap:4px;padding:4px;border:2px solid var(--line);border-radius:99px;background:var(--surface)}
+.tabs button{border:0;border-radius:99px;padding:7px 16px;background:transparent;color:var(--muted);font:800 .82rem var(--sans);cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.tabs button svg{width:18px;height:18px;flex-shrink:0}
+.tabs button[aria-selected="true"]{background:var(--brand);color:#fff}
+@media(max-width:720px){.appbar-in{flex-wrap:wrap;row-gap:8px}.tabs{order:3;width:100%}.tabs button{flex:1;justify-content:center}}
+.lbl-hint{font-weight:600;color:var(--muted);margin-left:6px}
+.wlist{display:flex;flex-direction:column;gap:6px;margin-top:4px}
+.wrow{display:grid;grid-template-columns:minmax(0,1fr) 84px 30px;gap:5px;padding:7px;border:2px solid var(--brand-soft);border-radius:12px;background:var(--surface)}
+.wrow input{min-width:0;border:0;border-radius:8px;background:var(--field);color:var(--text);padding:6px 8px;font:700 .78rem var(--mono);outline:none}
+.wrow input:focus{box-shadow:0 0 0 2px var(--brand)}
+.wrow input.bad{box-shadow:0 0 0 2px var(--sell)}
+.wrow .wl{grid-column:1;grid-row:1;font-family:var(--sans)}
+.wrow .wt{grid-column:2;grid-row:1}
+.wrow .wa{grid-column:1/3;grid-row:2}
+.wrow .wd{grid-column:3;grid-row:1/3;border:2px solid var(--line);border-radius:8px;background:var(--surface);color:var(--text);font:900 .9rem var(--sans);cursor:pointer}
+.wrow .wd:hover{background:var(--sell);color:#fff}
+.wbtns{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.mini{border:2px solid var(--line);border-radius:10px;background:var(--surface);color:var(--text);padding:5px 10px;font:800 .7rem var(--sans);cursor:pointer}
+.mini:hover{border-color:var(--brand);color:var(--brand)}
+.mini:disabled{opacity:.4;cursor:not-allowed}
+.whint{font-size:.64rem;font-weight:600;color:var(--muted);margin-top:6px;line-height:1.5}
+.pick{width:100%;margin-bottom:6px;border:0;border-radius:8px;background:var(--surface);color:var(--text);padding:6px 8px;font:700 .74rem var(--sans)}
+.tx .sub{padding:8px 14px 6px;font-size:.68rem;font-weight:900;color:var(--brand);background:var(--brand-tint)}
+.tx-head .wtag{font-size:.7rem;font-weight:800;color:var(--muted)}
+
+.tokset{margin:0 0 16px;background:var(--surface);border:2px solid var(--line);border-radius:16px;padding:12px 14px;box-shadow:3px 3px 0 var(--shadow)}
+.tokset summary{cursor:pointer;font-weight:900;font-size:.82rem}
+.tokrow{display:grid;grid-template-columns:minmax(0,1fr) 92px minmax(0,1.2fr) auto auto;gap:6px;align-items:center;padding:6px 0;border-top:1px dashed var(--brand-soft)}
+.tokrow .tcode{font:800 .78rem var(--mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tokrow .tiss{font:600 .68rem var(--mono);color:var(--brand);text-decoration:none}
+.tokrow .tsym{min-width:0;border:0;border-radius:8px;background:var(--field);color:var(--text);padding:5px 8px;font:700 .76rem var(--mono)}
+.tokrow .tsup{display:flex;align-items:center;gap:4px;font-size:.68rem;font-weight:800;white-space:nowrap}
+.tokrow .tsup input{accent-color:var(--brand)}
+.tokrow .tchk{font-size:.66rem;font-weight:800;color:var(--muted);white-space:nowrap}
+.tokrow .tchk.ok{color:var(--buy)}
+.tokrow .tnote{grid-column:1/-1;font-size:.68rem;color:var(--muted);margin-top:-2px}
+.tokrow .tnote a{color:var(--brand);font-weight:800;text-decoration:none}
+@media(max-width:540px){.tokrow{grid-template-columns:minmax(0,1fr) auto}.tokrow .tiss{grid-column:2}.tokrow .tsym{grid-column:1}}
+
+/* ===== XRPL tab: Flare Tax layout ===== */
+.xp{max-width:1180px;margin:0 auto}
+.xcard{background:var(--surface);border:2px solid var(--line);border-radius:26px;padding:18px;margin-bottom:24px;box-shadow:6px 6px 0 var(--shadow)}
+.xcard.xpanel{position:relative;margin-top:-60px}
+.xcard.xflush{padding:0}
+.xcard-title{font-size:1.05rem;font-weight:900;margin-bottom:12px}
+.xform{display:grid;grid-template-columns:minmax(0,1fr) 220px;gap:10px;align-items:stretch}
+.xside{display:flex;flex-direction:column;gap:10px}
+.xmode{width:100%;border:0;background:transparent;color:var(--text);font:800 .82rem var(--sans);outline:none;cursor:pointer}
+.xgroup{background:var(--field);border-radius:16px;padding:10px 14px;border:2px solid transparent;transition:border-color .15s;min-width:0}
+.xgroup:focus-within,.xgroup:hover{border-color:var(--brand)}
+.xgroup label{display:block;font-size:.68rem;font-weight:800;color:var(--brand);margin-bottom:4px}
+.xgroup input[type=date]{width:100%;border:0;background:transparent;color:var(--text);font:800 1rem var(--sans);outline:none}
+.xgroup .wlist{margin-top:6px}
+.btn.xfetch{flex:1;margin:0;min-height:52px}
+.btn.xfetch.stop,.btn.stop{background:var(--sell);color:#fff}
+.xnote{background:var(--brand-tint);border-radius:16px;padding:10px 14px;margin-top:12px;font-size:.74rem;font-weight:500;color:var(--muted);line-height:1.7}
+.xnote strong{color:var(--text);font-weight:800}
+.xnote a{color:var(--brand);font-weight:800;text-decoration:none;margin-left:6px}
+.xnote.xtight{margin:0 0 12px}
+.xloader{display:none;align-items:center;gap:12px;padding:14px 18px;margin-bottom:24px;border:2px dashed var(--brand);border-radius:20px;background:var(--brand-tint);font-size:.82rem;font-weight:700}
+.xloader.on{display:flex}
+.xloader .status{flex:1;margin:0}
+.xspinner{width:22px;height:22px;flex-shrink:0;border:3px solid var(--brand-soft);border-top-color:var(--brand);border-radius:50%;animation:xspin .8s linear infinite}
+@keyframes xspin{to{transform:rotate(360deg)}}
+.xwarn{display:none;margin-bottom:20px;padding:12px 14px;border-radius:16px;border:2px solid var(--sell);background:var(--brand-tint);color:var(--sell);font-size:.8rem;font-weight:700;line-height:1.6;white-space:pre-line}
+.xstats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.xstat{background:var(--field);border-radius:18px;padding:14px 16px;border:2px solid transparent}
+.xstat .v{font-size:2.2rem;font-weight:900;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.03em}
+.xstat .l{font-size:.68rem;font-weight:800;color:var(--muted);margin-top:6px}
+.xstat .s{font-size:.65rem;color:var(--muted);margin-top:5px;font-family:var(--mono)}
+.x-export .v{color:var(--buy)}
+.x-review{background:var(--brand-tint);border-color:var(--brand)}
+.x-review .v{color:var(--brand)}
+.x-skip .v{color:var(--muted)}
+.xsub{margin-top:14px;border:2px dashed var(--brand);border-radius:16px;padding:10px 14px;background:var(--brand-tint)}
+.xsub>summary{cursor:pointer;font-size:.8rem;font-weight:900;list-style:none}
+.xsub>summary::-webkit-details-marker{display:none}
+.xsub>summary::after{content:" ▸";color:var(--brand)}
+.xsub[open]>summary::after{content:" ▾"}
+.xhint{font-size:.72rem;color:var(--muted);margin:8px 0 6px;line-height:1.6}
+.xhint strong{color:var(--text)}
+.xmuted{color:var(--muted);font-weight:600}
+.xsmall{font-size:.72rem}
+.xlp-sum{cursor:pointer;padding:18px;display:flex;justify-content:space-between;align-items:center;gap:12px;list-style:none}
+.xlp-sum::-webkit-details-marker{display:none}
+.xlp-sum .xcard-title{margin:0}
+.xlp-body{padding:0 18px 18px}
+.xtools-r{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.xtoolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:12px}
+.seg{display:inline-flex;gap:4px;padding:4px;border:2px solid var(--line);border-radius:99px;background:var(--surface);flex-wrap:wrap}
+.seg-btn{border:0;border-radius:99px;padding:7px 14px;background:transparent;color:var(--muted);font:800 .82rem var(--sans);cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.seg-btn:hover{color:var(--text)}
+.seg-btn.on{background:var(--brand);color:#fff}
+.seg-n{font:700 .7rem var(--mono);padding:0 7px;border-radius:99px;background:var(--brand-soft);color:var(--brand)}
+.seg-btn.on .seg-n{background:rgba(255,255,255,.25);color:#fff}
+.xtable-wrap{overflow:auto;border:2px solid var(--line);border-radius:18px;max-height:72vh}
+.xp table{width:100%;border-collapse:collapse;font-size:.8rem}
+.xp thead th{position:sticky;top:0;z-index:1;background:var(--brand-tint);color:var(--muted);font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;text-align:left;padding:10px 9px;border-bottom:2px solid var(--line);white-space:nowrap}
+.xp tbody td{padding:8px 9px;border-bottom:1.5px solid var(--brand-soft);white-space:nowrap;font-variant-numeric:tabular-nums;vertical-align:middle}
+.xp tbody tr:last-child td{border-bottom:0}
+.xp tbody tr:hover{background:var(--brand-tint)}
+.xp tr.row-review td:first-child{box-shadow:inset 4px 0 0 var(--brand)}
+.xp tr.row-skip td{color:var(--muted)}
+.sbadge{display:inline-block;padding:3px 8px;border-radius:99px;font-size:.64rem;font-weight:900;letter-spacing:.04em;border:1.5px solid transparent;white-space:nowrap}
+.s-export{background:color-mix(in srgb,var(--buy) 14%,transparent);color:var(--buy);border-color:var(--buy)}
+.s-review{background:var(--brand);color:#fff}
+.s-skip{background:transparent;color:var(--muted);border:1.5px dashed var(--muted)}
+.s-scam{background:var(--sell);color:#fff}
+.xp tr.row-scam td{color:var(--muted)}
+.xchk{width:16px;height:16px;accent-color:var(--brand);cursor:pointer}
+#xWalletFilter{max-width:none}
+.xact{max-width:178px;background:var(--field);color:var(--text);border:2px solid transparent;padding:5px 8px;border-radius:10px;font:800 .74rem var(--sans);cursor:pointer;outline:none}
+.xact:focus,.xact:hover{border-color:var(--brand)}
+.xprice{width:90px;border:2px solid var(--brand);border-radius:8px;background:var(--surface);color:var(--text);padding:4px 6px;font:700 .76rem var(--mono)}
+.xpill.xauto{color:var(--buy);border-color:var(--buy)}
+.xpill{font:800 .58rem var(--sans);color:var(--mint);border:1.5px solid var(--mint);border-radius:99px;padding:0 5px;margin-left:3px}
+.xcard.xwide{--w:min(1560px,calc(100vw - 32px));width:var(--w);margin-left:calc((100% - var(--w)) / 2)}
+.xp tbody td.xdate{font-size:.74rem;line-height:1.35}
+.xccy{color:var(--muted);font:700 .66rem var(--sans)}
+.xtot{display:block;margin-top:3px;color:var(--muted);font:600 .66rem var(--mono)}
+.xtot:empty{display:none}
+/* pills and currency go under the value so the narrow columns don't push the table wider */
+.xp tbody td.xstack .xpill,.xp tbody td.xstack .xccy{display:table;margin:3px 0 0}
+.xp tbody td.xnum{font:600 .76rem var(--mono)}
+.xcomment{font-size:.76rem;font-weight:700;min-width:240px;max-width:330px;white-space:normal!important;line-height:1.45}
+.xbasis{font-size:.62rem;font-weight:500;color:var(--muted);opacity:.8;margin-top:2px;line-height:1.4;word-break:break-all}
+.xcomment .xinfo{font-weight:500}
+.xcomment .xinfo.xw{color:var(--warn);font-weight:700}
+.xcomment .xinfo b{color:var(--text);font-weight:700}
+.xinfo{font-size:.68rem;color:var(--muted);margin-top:2px;line-height:1.5}
+.xw{color:var(--warn);font-weight:800}
+.xmono{font-family:var(--mono)}
+.xreg{color:var(--brand);font-weight:800}
+.xtxl{color:var(--brand);font:700 .72rem var(--mono);text-decoration:none}
+.xtxl:hover{text-decoration:underline}
+.xp .cp{cursor:copy}
+.xp .cp.copied{outline:2px solid var(--brand);outline-offset:2px;border-radius:4px}
+.xnone{text-align:center;color:var(--muted);padding:1rem!important}
+.xempty{text-align:center;padding:28px;margin-bottom:24px;border:2px dashed var(--brand);border-radius:26px;background:var(--brand-tint);color:var(--muted);font-weight:700}
+.xp .help{margin-top:0}
+@media(max-width:900px){.xform{grid-template-columns:minmax(0,1fr)}.xstats{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:540px){.xcard{padding:14px}.xstat .v{font-size:1.7rem}}
+/* access code lock (a simple lock; only active where the deploy placed gate.json) */
+html.gate-check body>*:not(.gate){visibility:hidden}
+body.gated>*:not(.gate){display:none!important}
+.gate{min-height:100vh;display:grid;place-items:center;padding:24px 16px;background:var(--hero-bg)}
+.gate[hidden]{display:none}
+.gate-card{width:100%;max-width:400px;background:var(--surface);border:2px solid var(--line);border-radius:26px;padding:26px 22px;box-shadow:6px 6px 0 var(--shadow);text-align:center}
+.gate-icon svg{width:56px;height:56px;margin-bottom:10px}
+.gate-title{font-weight:900;font-size:1.2rem;margin-bottom:6px}
+.gate-text{font-size:.8rem;color:var(--muted);line-height:1.7;margin-bottom:14px}
+.gate-card input{width:100%;background:var(--field);border:2px solid transparent;border-radius:14px;padding:12px 14px;color:var(--text);font:800 1rem var(--sans);text-align:center;outline:none}
+.gate-card input:focus{border-color:var(--brand)}
+.gate-err{min-height:1.4em;margin:8px 0 0;font-size:.76rem;font-weight:700;color:var(--warn)}
+.gate-card .btn{margin-top:6px}
+</style>
+</head>
+<body>
+<div class="gate" id="gate" hidden>
+  <form class="gate-card" id="gateForm" autocomplete="off">
+    <div class="gate-icon" id="gateIcon" aria-hidden="true"></div>
+    <p class="gate-title">限定公開中です</p>
+    <p class="gate-text">アクセスコードを入力してください。一度入力すると、この端末では次回から省略されます。</p>
+    <input type="text" id="gateInput" placeholder="アクセスコード" autocapitalize="off" spellcheck="false">
+    <p class="gate-err" id="gateErr"></p>
+    <button class="btn" type="submit">開く →</button>
+  </form>
+</div>
+<div class="appbar"><div class="appbar-in">
+  <div class="brand">
+    <svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect x="4" y="1.5" width="24" height="29" rx="6" fill="var(--brand)" stroke="var(--line)" stroke-width="2"/><rect x="8" y="5.5" width="16" height="7" rx="2" fill="#fff" stroke="var(--line)" stroke-width="1.5"/><g fill="#fff" stroke="var(--line)" stroke-width="1.2"><rect x="8" y="15.5" width="4.4" height="4" rx="1.2"/><rect x="13.8" y="15.5" width="4.4" height="4" rx="1.2"/><rect x="19.6" y="15.5" width="4.4" height="4" rx="1.2"/><rect x="8" y="21.5" width="4.4" height="4" rx="1.2"/><rect x="13.8" y="21.5" width="4.4" height="4" rx="1.2"/><rect x="19.6" y="21.5" width="4.4" height="4" rx="1.2"/></g></svg>
+    <span>XRPL Tax <b>for Cryptact</b></span>
+  </div>
+  <nav class="tabs" role="tablist">
+    <button role="tab" id="tabXrpl" aria-selected="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5l6 6.5L5 18M19 5l-6 6.5 6 6.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>XRPL</button>
+    <button role="tab" id="tabCafe" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h12v6a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z" fill="currentColor"/><path d="M16 10h2a2.5 2.5 0 0 1 0 5h-2" fill="none" stroke="currentColor" stroke-width="2"/></svg>xrp.cafe</button>
+  </nav>
+</div></div>
+
+<header class="hero"><div class="hero-in">
+  <div id="heroXrpl">
+    <h1 class="catch">XRPLの取引を、<em>クリプタクト</em>の入力欄ごとに。</h1>
+    <p class="lead">登録したウォレットと期間から、FXRPのミント・償還（Smart Accounts含む）、DEXのスワップ、AMM・Doppler Vaultの預け入れ・引き出し、トークンの受け取り（報酬・エアドロ）、登録していない相手との送受金、ウォレット間の送金を読み取ります。FXRPの手数料はFlare側の記録と照合して正確に出します。NFT（xrp.cafeなど）の取引はここには含まれないので、<a href="#cafe" onclick="document.getElementById('tabCafe').click();return false">xrp.cafeタブ</a>を見てください。</p>
+  </div>
+  <div id="heroCafe" hidden>
+  <h1 class="catch">NFTの売買を、<em>クリプタクト</em>の入力欄ごとに。</h1>
+  <p class="lead">アドレスと期間を入れると、買い・売り・無償受取・ミントをXRPLの台帳から直接読み取ります。xrp.cafeの手数料やロイヤリティも分けて計算します。</p>
+</div>
+</div></header>
+
+<main class="wrap">
+<div class="pane xp" id="paneXrpl">
+  <!-- Input -->
+  <div class="xcard xpanel">
+    <div class="xform">
+      <div class="xgroup xwallets">
+        <label>ウォレット <span class="lbl-hint">最大20件・このブラウザに保存</span></label>
+        <div class="wlist" id="wlist"></div>
+        <div class="wbtns">
+          <button type="button" class="mini" id="wAdd">＋ 追加</button>
+          <button type="button" class="mini" id="wExport" title="ウォレット・トークン設定・アドレス帳をJSONファイルに保存します（別のブラウザ・PCへの引っ越し用）">💾 ウォレットをファイルに保存</button>
+          <label class="mini" title="保存したJSONファイルからウォレットを復元します">📂 ファイルから読み込む<input type="file" id="wImport" accept="application/json,.json" hidden></label>
+        </div>
+      </div>
+      <div class="xside">
+        <div class="xgroup"><label for="xFrom">開始日</label><input type="date" id="xFrom"></div>
+        <div class="xgroup"><label for="xTo">終了日</label><input type="date" id="xTo"></div>
+        <div class="xgroup"><label for="xFxrpMode">FXRPの記録</label><select id="xFxrpMode" class="xmode" title="FXRPをクリプタクトでどう扱うか">
+          <option value="same">XRPとして扱う（推奨）</option><option value="rebrand">FXRPに切り替える（リブランド）</option></select></div>
+        <button class="btn xfetch" id="xRun">取引を取得する →</button>
+      </div>
+    </div>
+    <p class="xnote">
+      登録したウォレット（XRPLアドレス）の取引を期間で読み込み、クリプタクトの行に仕訳します。<strong>宛先タグを入れたもの</strong>は取引所の入金先として扱います（履歴は読まず、自分の口座への送金かどうかの判定だけに使います）。
+      AMMの元本（期間より前の預け入れ）は、必要な分だけ自動で過去をさかのぼって読みます。FXRPの数量と手数料はFlare側の記録と照合します。
+    </p>
+  </div>
+
+  <div class="xloader" id="xLoader"><div class="xspinner"></div><span class="status" id="xStatus"></span><button type="button" class="mini" id="xStop">停止</button></div>
+  <div class="xwarn" id="xWarn"></div>
+
+  <!-- Stats -->
+  <div class="xcard" id="xStatsCard" hidden>
+    <div class="xcard-title">📊 集計</div>
+    <div class="xstats">
+      <div class="xstat"><div class="v" id="xsTotal">0</div><div class="l">取得件数（行）</div></div>
+      <div class="xstat x-export"><div class="v" id="xsExport">0</div><div class="l">出力対象</div></div>
+      <div class="xstat x-skip"><div class="v" id="xsSkip">0</div><div class="l">スキップ</div><div class="s" id="xsSkipFee"></div></div>
+      <div class="xstat x-review"><div class="v" id="xsReview">0</div><div class="l">要確認</div></div>
+    </div>
+    <details class="xsub" id="xTokWrap">
+      <summary>🪙 トークン一覧と設定（Cryptact対応チェック用）<span id="xTokCount"></span></summary>
+      <p class="xhint">XRPLのトークンの多くはクリプタクトの未対応コインなので、カスタムコイン（CSVでは <code>USER-…</code>）として出力します。クリプタクトの対応コインリストにあるものは<b>対応コイン</b>にします：<b>価格あり</b>なら価格欄は空欄（クリプタクトの価格を使用）、<b>価格なし</b>ならこのツールが円価格を付けます。調べた結果はこのブラウザに保存され（「ファイルに保存」にも含まれます）、次回から「✓ 確認済み」になります。よく使うトークンは確認済みとして組み込んであります。主軸通貨名は変更できます（半角英大文字・数字・#）。</p>
+      <div id="xTokens"></div>
+    </details>
+  </div>
+
+  <!-- AMM position ledger -->
+  <div class="xcard xflush" id="xLpCard" hidden>
+    <details id="xLpDetails">
+      <summary class="xlp-sum"><span class="xcard-title">📒 AMM・Vaultポジション台帳 <span id="xLpCount" class="xmuted"></span></span><span class="xmuted xsmall">クリックで開閉 ▾</span></summary>
+      <div class="xlp-body">
+        <p class="xhint"><strong>運用中</strong> = まだプールに元本が残っている（LPトークン保有中）。<strong>清算済み</strong> = 全額引き出して差益（BONUS）・差損（LOSS）の精算まで完了。
+        元本の出し入れ（LEND/RECOVER）は損益ゼロなのでスキップ扱いで、<strong>差益・差損の行だけ</strong>が出力対象です（Flare側ツールと同じ方針）。</p>
+        <label class="opt-row"><input type="checkbox" id="xShowClosed" checked> 清算済みも表示する</label>
+        <div class="xtable-wrap"><table>
+          <thead><tr><th>状態</th><th>プール</th><th>預入累計</th><th>回収元本</th><th>残元本</th><th>実現差益</th><th>実現差損</th><th>取引数</th><th>期間</th></tr></thead>
+          <tbody id="xLpBody"></tbody>
+        </table></div>
+      </div>
+    </details>
+  </div>
+
+  <!-- Results -->
+  <div class="xcard xwide" id="xResults" hidden>
+    <div class="xtoolbar">
+      <div class="seg" id="xSeg">
+        <button class="seg-btn on" data-f="all">すべて<span class="seg-n" id="xtAll">0</span></button>
+        <button class="seg-btn" data-f="export">出力対象<span class="seg-n" id="xtExport">0</span></button>
+        <button class="seg-btn" data-f="skip">スキップ<span class="seg-n" id="xtSkip">0</span></button>
+        <button class="seg-btn" data-f="review">要確認<span class="seg-n" id="xtReview">0</span></button>
+        <button class="seg-btn" data-f="scam" hidden>SCAM<span class="seg-n" id="xtScam">0</span></button>
+      </div>
+      <div class="xtools-r">
+        <select class="xact" id="xWalletFilter" title="ウォレットで絞り込み"></select>
+        <button class="btn ghost" id="xCsv">📥 CSVダウンロード</button>
+      </div>
+    </div>
+    <p class="xnote xtight">💡 登録したすべてのウォレットをまとめて読み込み、1つの表・1つのCSVにします（右上でウォレットごとに表示を絞り込めます）。チェックした行だけがCSVに出力されます（初期状態は「出力対象」の行）。Actionは行ごとに変更できます。値のセルをクリックするとコピーできるので、手動入力にも使えます。
+      <a href="https://support.cryptact.com/hc/ja/articles/4413123225497" target="_blank" rel="noopener">カスタムコインの作り方↗</a>
+      <a href="https://support.cryptact.com/hc/ja/articles/360002571312" target="_blank" rel="noopener">カスタムファイルの作り方↗</a></p>
+    <div class="xtable-wrap"><table class="xtx">
+      <thead><tr><th>出力</th><th>Status</th><th>日時</th><th>Action</th><th>Base</th><th>Volume</th><th>Price</th><th>Counter</th><th>Fee</th><th>Comment</th><th>Tx</th></tr></thead>
+      <tbody id="xBody"></tbody>
+    </table></div>
+  </div>
+
+  <div class="xempty" id="xEmpty" hidden>📭 該当する取引が見つかりませんでした。</div>
+
+  <details class="help">
+    <summary>計算ルールと判定のしかた</summary>
+    <ul>
+      <li><b>FXRPの記録</b>は2通りから選べます。<b>XRPとして扱う（推奨）</b>：FXRPはXRPをFlareに橋渡ししたもの（ブリッジしたUSDTが同じUSDTのまま、と同じ考え方）なので、ミント・償還はクリプタクトに入力せず、手数料だけをDeFi手数料（DEFIFEE、XRP）で記録します。Flare側のFXRPの受取・預け入れもXRPとして記録します。<b>FXRPに切り替える</b>：ミントは損益を出さないリブランド（REBRAND）。償還は、クリプタクトが同じ年の中でFXRP→XRPへ戻すリブランドを受け付けないため、在庫減少（REDUCE）でFXRPを減らし、XRPを買い（BUY・価格はFXRPの平均取得単価）で増やす2行にします。</li>
+      <li><b>判定</b>：エージェントへの送金でメモ <code>FBPRfA…0001</code> ＝ミント（v1.0〜1.2）、コアボールト <code>rfkXSaCZ…</code> への送金でメモ <code>…0018</code>/<code>…0021</code> ＝v1.3の直接ミント、それ以外のメモ＝Smart Accounts、エージェントからの受取でメモ <code>…0002</code> ＝償還。数量・手数料はFlare側の記録（MintingExecuted / DirectMintingExecuted / RedemptionRequested）と照合した確定値です。</li>
+      <li><b>Smart Accountsの指示</b>（オペレーター <code>rM2LEysS…</code> への送金）は、Flare側の手数料（FLR）を立て替えてもらう代金なので、全額をDeFi手数料（XRP）にします。Flare側ではこのFLRを記録しません。</li>
+      <li><b>DEXスワップ</b>：1つの取引で1種類を出して1種類を受け取ったもの（自分の注文が他の人の取引で約定した場合も含む）。カスタムコインは主軸通貨にしか書けないため、トークン⇔XRPはトークン側をBaseにして BUY / SELL・Counter XRP。カスタムコイン同士は円を挟んだ2行になります。</li>
+      <li><b>円換算のルール</b>（カスタムコインに価格が必要な行）：まずXRP建ての価値を、① 取引の片方がXRPならその額（円換算は不要）、② トークン同士でも同じ取引の中でXRPを経由して約定していれば、その経由したXRPの量、③ それもなければ、そのトークンとXRPのAMMプールの、取引の直前のレジャー時点の比率、④ AMMの引き出しは払い戻された比率、の順で決めます。XRPから円へは、bitbankのXRP/JPYの1分足の終値を使います。自動で出した価格には「自動」の印が付き、根拠をコメントに残します。⑤ どれも取れない場合は「要確認」で手入力です。</li>
+      <li><b>AMM</b>は差分計上：預け入れ＝LEND、引き出し＝元本までRECOVER（どちらもスキップ）、元本を超えた分＝BONUS、全額引き出し時に戻らなかった元本＝LOSS（出力対象）。カスタムコインのBONUS/LOSSは価格（円）が必要なので要確認です。</li>
+      <li><b>Doppler Finance のVault</b>（XRP / RLUSD）もAMMと同じ差分計上です：入金口座 <code>rEPQxs…</code> への送金＝LEND、出金口座 <code>rGuVpU…</code> からの受取＝元本までRECOVER、超えた分（自動複利の利息）＝BONUS。出金があると、元本を出すため過去の入金をすべてさかのぼって読みます。</li>
+      <li><b>トークンの受け取り</b>（何も出さずにトークンだけ入ったもの）はボーナス（BONUS）です。メモ付きの配布、同じ相手から3回以上の配布（ステーキング報酬など）、発行者からの配布は「出力対象」（少額でも報酬として計上）、1回だけで1円未満のもの・市場価格がなくメモでサイトに誘導するものは「SCAM」（スキップ）、それ以外（メモなしの単発）は取引所や人からの送金かもしれないので「要確認」にします。相手のアドレスは行の「登録」から名前を付けられ、「自分」にするとその相手からの受け取りは送金扱い（スキップ）になります。価格は上の円換算ルール（AMM、なければ板の買い気配。XRP/JPYは報酬が毎日届くことが多いので1時間足）で自動で入れます。</li>
+      <li><b>SCAM</b>：見知らぬ相手からの0.01 XRP未満の送金（アドレスを似せた詐欺や宣伝）と、上のスパム的なトークンの受け取りです。CSVには出さず、「SCAM」タブにまとめます。こうした相手のアドレスには送金しないよう注意してください。</li>
+      <li><b>FXRPのSongbird分</b>：Flareメインネットで始まる前（2025年9月以前）のSongbird上のFXRP（FAssets v1.0〜1.1）のミント・償還も、Songbird側の記録と照合します（Sourceは「FAssets Songbird」）。</li>
+      <li><b>サービス手数料</b>：メモに「Service Fee」とある送金（Xamanの手数料など）は、DeFi手数料として出力します。</li>
+      <li><b>登録していない相手との送受金</b>（Flare側ツールと同じ扱い）：XRPの受け取りは BUY（メモ付きは BONUS）、送金は SELL で、どちらも「要確認」です。自分の取引所やウォレットとの移動なら、行の「登録」で相手を「自分」にするとスキップ（送金扱い）になります。宛先タグ付きの送金は取引所の入金先の可能性が高いです。XRPの価格は空欄（クリプタクトの時価）、カスタムコインを送った場合は円換算ルールで価格を入れます。xrp.cafeの有料ミントの代金はxrp.cafeタブで扱うので、ここには出しません。</li>
+      <li><b>ウォレット間送金</b>（登録したウォレット同士、取引所の入金先を含む）と、手数料だけの取引（トラストライン設定・注文の取消など）はスキップです。</li>
+      <li>クリプタクトのDeFi連携などで、Flare側のFXRPのミントが取り込まれている場合は二重になるので除外してください。データ元：XRPL（s2.ripple.com）、Flare（flare-explorer.flare.network）。税務上の最終判断はご自身または税理士の確認のうえで行ってください。</li>
+    </ul>
+  </details>
+</div>
+
+<div class="pane" id="paneCafe" hidden>
+<div class="layout">
+  <section class="panel">
+    <div class="field">
+      <label class="lbl" for="addr">XRPL ADDRESS</label>
+      <select class="pick" id="addrPick"></select>
+      <input type="text" id="addr" placeholder="r..." spellcheck="false">
+    </div>
+    <div class="grid2">
+      <div class="field"><label class="lbl" for="from">FROM (JST)</label><input type="date" id="from"></div>
+      <div class="field"><label class="lbl" for="to">TO (JST)</label><input type="date" id="to"></div>
+    </div>
+    <label class="opt-row"><input type="checkbox" id="optFees" checked> 約定したオファーの作成手数料を取引に合算</label>
+    <label class="opt-row"><input type="checkbox" id="optNames" checked> NFT名をメタデータから取得</label>
+    <button class="btn" id="run">抽出する</button>
+    <div id="status"></div>
+  </section>
+
+  <div class="col-results">
+    <div class="results" id="results">
+      <div class="rh"><span class="rt">抽出結果</span><span class="rc" id="rcount"></span></div>
+      <div class="stats" id="stats"></div>
+      <div class="toolbar" id="filters"></div>
+      <div class="csvrow">
+        <button class="btn ghost" id="csvCustom">クリプタクト用CSV</button>
+      </div>
+      <div class="helplinks">
+        <span>クリプタクトのヘルプ</span>
+        <a href="https://support.cryptact.com/hc/ja/articles/4413123225497" target="_blank" rel="noopener">カスタムコインの作り方↗</a>
+        <a href="https://support.cryptact.com/hc/ja/articles/48512489985177" target="_blank" rel="noopener">手動で取引を追加する方法↗</a>
+        <a href="https://support.cryptact.com/hc/ja/articles/5180166769561" target="_blank" rel="noopener">NFT取引の登録方法↗</a>
+        <a href="https://support.cryptact.com/hc/ja/articles/360002571312" target="_blank" rel="noopener">カスタムファイルの作り方↗</a>
+      </div>
+      <div class="vlist" id="list"></div>
+    </div>
+
+    <details class="help">
+      <summary>計算ルールと入力のしかた</summary>
+      <ul>
+        <li>各項目をクリックするとコピーできます。フォームの「価格参照をする」はOFFにし、決済通貨・手数料通貨は <code>XRP</code> を選んでください（円換算はクリプタクトが行います）。</li>
+        <li><b>価格</b>はxrp.cafeの履歴CSVの価格と同じになります。出品を買った場合は出品価格、オファー（入札）が承諾された場合とオークションは入札額です。</li>
+        <li><b>xrp.cafe手数料（1.589%）</b>：出品を買った場合は買い手が上乗せで払うため、<b>買い</b>の手数料に入ります。入札が承諾された場合やオークションは入札額から差し引かれるため、<b>売り</b>の手数料に入ります。</li>
+        <li><b>買い</b>の手数料 = （上乗せ分のxrp.cafe手数料）+ 自分が払ったネットワーク手数料（購入オファー作成分を含む）。</li>
+        <li><b>売り</b>の手数料 = （差し引かれたxrp.cafe手数料）+ ロイヤリティ + 自分が払ったネットワーク手数料（売りオファー作成分を含む）。</li>
+        <li><b>無償受取</b>：0 XRPで受け取ったNFT（無料ミント・エアドロップ・プレゼントなど）です。種類「ボーナス」、価格0、決済通貨JPYで入力し、手数料は入力しません。</li>
+        <li><b>主軸通貨</b>はクリプタクトのカスタムコインで使える文字（半角英大文字・数字・#）だけに変換しています（例: XRP Hugs65 → XRPHUGS65）。手動入力では「カスタムコイン/DeFiトークンを作成・利用する」をONにして、この文字列をそのまま入れます（USER- は自動で付きます）。CSVでは USER- を付けて出力します。日本語などを含む名前は、区別できるようにNFT IDの末尾を頭に付けます。</li>
+        <li><b>クリプタクト用CSV</b>は「入力済」にしていない行だけを出力します。手動入力とCSVアップロードで同じ取引を二重に登録しないためです。アップロードした後は、その行を「入力済」にしてください。</li>
+        <li><b>有料ミント</b>：xrp.cafeのローンチパッドでのミントです。XRPの送金（メモ「XRP for NFT mint by xrp.cafe」）と、その直後にxrp.cafeのミント用アカウントから0 XRPで届くNFTを組み合わせ、「買い」として表示します。価格は送金額 ÷ 届いた個数です。続けて何回か送金した場合は、合計額を個数で割り振ります。</li>
+        <li><b>ミント</b>：自分でミントしたNFTです。種類は「買い」、価格0で入力し、ミントのネットワーク手数料を手数料に入れます。</li>
+        <li><b>取得時（参考）</b>：売ったNFTをどう手に入れたかです。期間より前に取得したものは「取得原価がわからない場合」を押すと、必要な分だけ過去をさかのぼって調べます。</li>
+        <li>表示するのは「買い」「売り」「無償受取」「ミント」「有料ミント」だけです。送付・バーン・ロイヤリティ、約定しなかったオファーの手数料などは表示しません。</li>
+        <li>xrp.cafe経由かどうかは、ブローカーアカウント（売買 <code>rpx9JThQ2y37FaGeeJP7PXDUVEXY3PHZSC</code>、オークション <code>rKWCPCDKbn3cLRSFpUgqS5Nc3z3s6UUTu6</code>）か、メモに「xrp.cafe」が入っているかで判定しています。</li>
+        <li>データ元は公開XRPLノード（s2.ripple.com、つながらない場合はxrplcluster.com）です。税務上の最終判断はご自身または税理士の確認のうえで行ってください。</li>
+      </ul>
+    </details>
+  </div>
+</div>
+</div>
+</main>
+
+<script id="core">
+const RPCS=["https://xrplcluster.com","https://xrpl.ws"];
+// xrp.cafe broker accounts: sales (since 2023) and auctions (seen 2024-2025, memo "xrp.cafe - auction complete")
+const CAFE_BROKERS=new Set(["rpx9JThQ2y37FaGeeJP7PXDUVEXY3PHZSC","rKWCPCDKbn3cLRSFpUgqS5Nc3z3s6UUTu6"]);
+const RIPPLE_EPOCH=946684800;
+// xrp.cafe launchpad: buyer pays XRP with this memo, then one of these accounts delivers the NFT at 0 XRP
+const CAFE_MINTERS=new Set(["rfx2mVhTZzc6bLXKeYyFKtpha2LHrkNZFT","rKqqb5QZXVAL3VqXJL6obfRGeHou1DtyBV"]);
+const MINT_PAY_MEMO=/NFT mint by xrp\.cafe/i;
+const MINT_PAY_LOOKBACK=86400; // payments this long before the range start can still pay for NFTs inside it
+const NFT_TYPES=new Set(["NFTokenMint","NFTokenAcceptOffer","NFTokenCreateOffer","NFTokenCancelOffer","NFTokenBurn","NFTokenModify"]);
+
+const WSS=["wss://s2.ripple.com","wss://s1.ripple.com"];
+// A running fetch can be stopped from the UI: every wait and page boundary checks this flag
+const job={cancelled:false};
+const CANCELLED="CANCELLED";
+function checkCancel(){if(job.cancelled)throw new Error(CANCELLED)}
+// Resolve with the request, or reject as soon as the job is cancelled instead of waiting for a large page
+function cancellable(promise){
+  return new Promise((resolve,reject)=>{
+    const t=setInterval(()=>{if(job.cancelled){clearInterval(t);reject(new Error(CANCELLED))}},150);
+    promise.then(v=>{clearInterval(t);resolve(v)},e=>{clearInterval(t);reject(e)});
+  });
+}
+async function sleep(ms){
+  const end=Date.now()+ms;
+  while(Date.now()<end){checkCancel();await new Promise(r=>setTimeout(r,Math.min(200,end-Date.now())))}
+  checkCancel();
+}
+
+// WebSocket is not subject to CORS, so Ripple's full-history nodes work from a local file
+let ws=null,wsReady=null,wsIdx=0,reqId=0;const pending=new Map();
+function wsConnect(){
+  if(wsReady)return wsReady;
+  wsReady=new Promise((resolve,reject)=>{
+    const url=WSS[wsIdx%WSS.length];
+    const s=new WebSocket(url);
+    const timer=setTimeout(()=>{s.close();reject(new Error("timeout "+url))},10000);
+    s.onopen=()=>{clearTimeout(timer);ws=s;resolve(s)};
+    s.onerror=()=>{clearTimeout(timer);reject(new Error("ws error "+url))};
+    s.onclose=()=>{ws=null;wsReady=null;for(const[,p]of pending)p.reject(new Error("ws closed"));pending.clear()};
+    s.onmessage=ev=>{const m=JSON.parse(ev.data);const p=pending.get(m.id);if(!p)return;pending.delete(m.id);
+      if(m.status==="error")p.reject(Object.assign(new Error(m.error_message||m.error),{code:m.error}));else p.resolve(m.result)};
+  }).catch(e=>{wsReady=null;wsIdx++;throw e});
+  return wsReady;
+}
+async function wsRequest(method,params){
+  const s=await wsConnect();
+  const id=++reqId;
+  return new Promise((resolve,reject)=>{
+    const timer=setTimeout(()=>{pending.delete(id);reject(new Error("request timeout"))},30000);
+    pending.set(id,{resolve:v=>{clearTimeout(timer);resolve(v)},reject:e=>{clearTimeout(timer);reject(e)}});
+    s.send(JSON.stringify({id,command:method,...params}));
+  });
+}
+async function rpc(method,params){
+  if(typeof WebSocket!=="undefined"){
+    for(let attempt=0;attempt<4;attempt++){
+      try{return await cancellable(wsRequest(method,params))}
+      catch(e){
+        if(e.message===CANCELLED)throw e;
+        if(e.code&&!["slowDown","tooBusy","noNetwork","noCurrent","noClosed"].includes(e.code))throw e;
+        await sleep(e.code==="slowDown"?3000:1000);
+      }
+    }
+  }
+  return httpRpc(method,params);
+}
+async function httpRpc(method,params){
+  let lastErr;
+  for(let attempt=0;attempt<10;attempt++){
+    const url=RPCS[attempt%RPCS.length];
+    let r;
+    try{
+      const res=await cancellable(fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({method,params:[params]})}));
+      r=(await res.json()).result;
+    }catch(e){lastErr=e;await sleep(1500);continue}
+    if(r&&r.status==="error"){
+      if(r.error==="slowDown"||r.error==="tooBusy"){
+        const m=/retry in ~(\d+)ms/.exec(r.error_message||"");
+        const wait=m?+m[1]+500:5000;
+        (rpc.onWait||httpRpc.onWait)&&(rpc.onWait||httpRpc.onWait)(wait);
+        lastErr=new Error(r.error_message||r.error);await sleep(wait);continue;
+      }
+      throw new Error(r.error_message||r.error);
+    }
+    return r;
+  }
+  throw lastErr;
+}
+
+const drops=v=>Number(v)/1e6;
+// Returns {value:Number, currency:String}
+function amt(a){
+  if(a==null)return{value:0,currency:"XRP"};
+  if(typeof a==="string")return{value:drops(a),currency:"XRP"};
+  return{value:Number(a.value),currency:decodeCurrency(a.currency)};
+}
+function decodeCurrency(c){
+  if(!c||c.length!==40)return c;
+  const hex=c.replace(/0+$/,"");let s="";
+  for(let i=0;i<hex.length;i+=2){const ch=parseInt(hex.substr(i,2),16);if(ch)s+=String.fromCharCode(ch)}
+  return s||c;
+}
+function hexToStr(h){try{return decodeURIComponent(h.replace(/(..)/g,"%$1"))}catch{return""}}
+const round6=n=>Math.round(n*1e6)/1e6;
+
+function nodesOf(meta){return(meta.AffectedNodes||[]).map(n=>{const k=Object.keys(n)[0];return{kind:k,...n[k]}})}
+function balanceDelta(meta,account){
+  for(const n of nodesOf(meta)){
+    if(n.LedgerEntryType!=="AccountRoot")continue;
+    const f=n.FinalFields||n.NewFields||{};
+    if(f.Account!==account)continue;
+    if(n.kind==="CreatedNode")return drops(f.Balance);
+    const p=n.PreviousFields||{};
+    return p.Balance!=null?drops(f.Balance)-drops(p.Balance):0;
+  }
+  return 0;
+}
+function deletedOffers(meta){
+  return nodesOf(meta).filter(n=>n.LedgerEntryType==="NFTokenOffer"&&n.kind==="DeletedNode")
+    .map(n=>({id:n.LedgerIndex,...n.FinalFields}));
+}
+function createdOfferId(meta){
+  const n=nodesOf(meta).find(n=>n.LedgerEntryType==="NFTokenOffer"&&n.kind==="CreatedNode");
+  return n?n.LedgerIndex:(meta.offer_id||null);
+}
+// NFT id -> URI hex, collected from NFTokenPage entries touched by the tx
+function collectUris(meta,map){
+  for(const n of nodesOf(meta)){
+    if(n.LedgerEntryType!=="NFTokenPage")continue;
+    for(const src of [n.FinalFields,n.NewFields,n.PreviousFields]){
+      for(const t of (src&&src.NFTokens)||[]){const x=t.NFToken;if(x&&x.URI&&!map[x.NFTokenID])map[x.NFTokenID]=x.URI}
+    }
+  }
+}
+function transferFeeOf(nftId){return parseInt(nftId.substr(4,4),16)/100000}
+function isCafe(tx){
+  if(CAFE_BROKERS.has(tx.Account))return true;
+  return(tx.Memos||[]).some(m=>/xrp\.cafe/i.test(hexToStr(m.Memo.MemoData||"")+hexToStr(m.Memo.MemoType||"")));
+}
+function isMintPayment(t,account){
+  const tx=t.tx;
+  return tx.TransactionType==="Payment"&&tx.Account===account&&t.meta.TransactionResult==="tesSUCCESS"
+    &&typeof t.meta.delivered_amount==="string"
+    &&(tx.Memos||[]).some(m=>MINT_PAY_MEMO.test(hexToStr(m.Memo.MemoData||"")));
+}
+function normalize(t){
+  const tx=t.tx_json||t.tx||t;
+  return{tx,meta:t.meta||t.metaData,hash:t.hash||tx.hash,date:tx.date,ledger:t.ledger_index||tx.ledger_index};
+}
+
+// Reads account_tx newest→oldest. opts.ledgerMax continues below an earlier fetch;
+// opts.stopAfter(t) lets the caller end paging early. The result carries minLedger / complete for continuing later.
+async function fetchHistory(account,fromTs,toTs,onProgress,opts={}){
+  const out=[];let marker;let page=0;let minLedger=Infinity;let complete=false;let stop=false;
+  while(true){
+    const p={account,limit:400,forward:false,ledger_index_min:-1,ledger_index_max:opts.ledgerMax??-1,api_version:2};
+    if(marker)p.marker=marker;
+    checkCancel();
+    const r=await rpc("account_tx",p);
+    for(const raw of r.transactions||[]){
+      const t=normalize(raw);
+      const ts=t.date+RIPPLE_EPOCH;
+      if(ts<fromTs-MINT_PAY_LOOKBACK){stop=true;break}
+      if(ts>=fromTs)minLedger=Math.min(minLedger,t.ledger);
+      if(ts>toTs)continue;
+      if(isMintPayment(t,account))out.push(t);
+      else if(ts>=fromTs&&NFT_TYPES.has(t.tx.TransactionType))out.push(t);
+      if(opts.stopAfter&&opts.stopAfter(t))stop=true;
+    }
+    page++;
+    onProgress&&onProgress(page,out.length,r.transactions&&r.transactions.length?(r.transactions[r.transactions.length-1].tx_json||{}).date:null);
+    if(!r.marker){complete=true;break}
+    if(stop)break;
+    marker=r.marker;
+  }
+  const res=out.reverse();
+  res.minLedger=minLedger;res.complete=complete;
+  return res;
+}
+
+async function fetchTx(hash){
+  const r=await rpc("tx",{transaction:hash,api_version:2});
+  return normalize(r);
+}
+
+// Core: turn raw NFT txs into Cryptact-ready rows
+async function analyze(account,txs,opts={}){
+  const uris={};
+  const offerFee={};      // offerId -> XRP fee paid by account to create it
+  const usedOffers=new Set();
+  const rows=[];
+  const loose=[];         // fees not attached to a trade
+  for(const t of txs){if(t.meta)collectUris(t.meta,uris)}
+
+  // offers created by the account in range
+  for(const t of txs){
+    if(t.tx.TransactionType==="NFTokenCreateOffer"&&t.tx.Account===account&&t.meta.TransactionResult==="tesSUCCESS"){
+      const id=createdOfferId(t.meta);if(id)offerFee[id]={fee:drops(t.tx.Fee),hash:t.hash};
+    }
+  }
+
+  for(const t of txs){
+    const{tx,meta}=t;
+    const type=tx.TransactionType;
+    const ok=meta.TransactionResult==="tesSUCCESS";
+    const mine=tx.Account===account;
+    const txFee=mine?drops(tx.Fee):0;
+    const base={hash:t.hash,ts:t.date+RIPPLE_EPOCH,cafe:isCafe(tx),txType:type};
+
+    if(!ok){if(mine)loose.push({...base,fee:txFee,why:"失敗した取引（"+type+"）"});continue}
+
+    if(type==="NFTokenMint"){
+      if(!mine)continue;
+      const id=meta.nftoken_id;
+      if(tx.URI&&id)uris[id]=tx.URI;
+      rows.push({...base,kind:"mint",nft:id,price:0,ccy:"XRP",fee:txFee,feeParts:[["ミント手数料",txFee]]});
+      continue;
+    }
+    if(type==="NFTokenBurn"){
+      if(!mine)continue;
+      rows.push({...base,kind:"burn",nft:tx.NFTokenID,price:0,ccy:"XRP",fee:txFee,feeParts:[["バーン手数料",txFee]]});
+      continue;
+    }
+    if(type==="NFTokenCreateOffer"){
+      // handled when the offer is consumed; leftovers become loose fees below
+      continue;
+    }
+    if(type==="NFTokenCancelOffer"||type==="NFTokenModify"){
+      if(mine)loose.push({...base,fee:txFee,why:type==="NFTokenCancelOffer"?"オファー取消":"NFT更新"});
+      continue;
+    }
+    if(type!=="NFTokenAcceptOffer")continue;
+
+    const offers=deletedOffers(meta).filter(o=>o.id===tx.NFTokenSellOffer||o.id===tx.NFTokenBuyOffer);
+    const sellO=offers.find(o=>o.id===tx.NFTokenSellOffer);
+    const buyO=offers.find(o=>o.id===tx.NFTokenBuyOffer);
+    const nft=meta.nftoken_id||(sellO||buyO||{}).NFTokenID;
+    const brokered=!!(sellO&&buyO);
+    const seller=sellO?sellO.Owner:tx.Account;
+    const buyer=buyO?buyO.Owner:tx.Account;
+    const brokerFee=brokered?amt(tx.NFTokenBrokerFee):{value:0,currency:"XRP"};
+    // xrp.cafe: when the seller's listing is taken, the market fee is added on top for the buyer (price = listing).
+    // When a bid is accepted (bid placed before the listing, or an auction), the fee comes out of the bid (price = bid).
+    let gross,sellerPaysBrokerFee=false;
+    if(brokered){
+      const memo=(tx.Memos||[]).map(m=>hexToStr(m.Memo.MemoData||"")).join(" ");
+      sellerPaysBrokerFee=/auction/i.test(memo)||(buyO.PreviousTxnLgrSeq<sellO.PreviousTxnLgrSeq);
+      const b=amt(buyO.Amount);
+      gross=sellerPaysBrokerFee?b:{value:b.value-brokerFee.value,currency:b.currency};
+    }
+    else gross=amt((sellO||buyO).Amount);
+    const ccy=gross.currency;
+    const afterBroker=sellerPaysBrokerFee?gross.value-brokerFee.value:gross.value;
+
+    // royalty: for XRP use the seller's real balance change, otherwise use the NFT's transfer fee
+    let royalty=0;
+    if(gross.value>0){
+      if(ccy==="XRP"){
+        const sellerNet=balanceDelta(meta,seller)+(tx.Account===seller?drops(tx.Fee):0);
+        royalty=Math.max(0,round6(afterBroker-sellerNet));
+      }else royalty=afterBroker*transferFeeOf(nft);
+    }
+    const brokerLabel=base.cafe?"xrp.cafe手数料":"ブローカー手数料";
+
+    // network fees of the offers the account created
+    const offerCreate=[];
+    for(const o of [sellO,buyO]){
+      if(!o||o.Owner!==account)continue;
+      usedOffers.add(o.id);
+      let f=offerFee[o.id];
+      if(!f&&opts.linkOfferFees&&o.PreviousTxnID){
+        checkCancel();
+        try{const c=await fetchTx(o.PreviousTxnID);if(c.tx.TransactionType==="NFTokenCreateOffer"&&c.tx.Account===account)f={fee:drops(c.tx.Fee),hash:c.hash}}catch{}
+      }
+      if(f)offerCreate.push(f);
+    }
+    const offerFees=opts.linkOfferFees?offerCreate.reduce((s,f)=>s+f.fee,0):0;
+
+    if(buyer===account){
+      const kind=gross.value>0?"buy":"receive";
+      const parts=[];
+      if(brokerFee.value&&!sellerPaysBrokerFee)parts.push([brokerLabel,brokerFee.value]);
+      if(txFee)parts.push(["約定手数料",txFee]);
+      if(offerFees)parts.push(["オファー作成手数料",offerFees]);
+      const fee=round6(parts.reduce((s,p)=>s+p[1],0));
+      rows.push({...base,kind,nft,price:round6(gross.value),ccy,fee,feeCcy:ccy,feeParts:parts,counterparty:seller,
+        mixedFee:ccy!=="XRP"&&(txFee||offerFees)});
+    }else if(seller===account){
+      const kind=gross.value>0?"sell":"send";
+      const parts=[];
+      if(brokerFee.value&&sellerPaysBrokerFee)parts.push([brokerLabel,brokerFee.value]);
+      if(royalty)parts.push(["ロイヤリティ",royalty]);
+      if(txFee)parts.push(["約定手数料",txFee]);
+      if(offerFees)parts.push(["オファー作成手数料",offerFees]);
+      const fee=round6(parts.reduce((s,p)=>s+p[1],0));
+      rows.push({...base,kind,nft,price:round6(gross.value),ccy,fee,feeCcy:ccy,feeParts:parts,counterparty:buyer,
+        mixedFee:ccy!=="XRP"&&(txFee||offerFees)});
+    }else{
+      // account neither bought nor sold: royalty income (issuer) or broker
+      const d=balanceDelta(meta,account)+txFee;
+      if(d>0)rows.push({...base,kind:"royalty",nft,price:round6(d),ccy:"XRP",fee:txFee,feeParts:txFee?[["手数料",txFee]]:[]});
+      else if(mine)loose.push({...base,fee:txFee,why:"オファー承認（第三者）"});
+    }
+  }
+
+  // offer creations never consumed in this range → loose fees
+  for(const t of txs){
+    if(t.tx.TransactionType!=="NFTokenCreateOffer"||t.tx.Account!==account||t.meta.TransactionResult!=="tesSUCCESS")continue;
+    const id=createdOfferId(t.meta);
+    if(opts.linkOfferFees&&usedOffers.has(id))continue;
+    loose.push({hash:t.hash,ts:t.date+RIPPLE_EPOCH,cafe:isCafe(t.tx),txType:"NFTokenCreateOffer",fee:drops(t.tx.Fee),
+      why:usedOffers.has(id)?"オファー作成":"オファー作成（期間内に約定せず）"});
+  }
+  const unpaidMints=matchPaidMints(txs,rows);
+
+  for(const l of loose){l.kind="fee";l.nft=null;l.price=0;l.ccy="XRP";l.feeCcy="XRP";l.fee=round6(l.fee);l.feeParts=[[l.why,l.fee]]}
+  const all=[...rows,...loose].sort((a,b)=>a.ts-b.ts);
+  return{rows:all,uris,unpaidMints};
+}
+
+// xrp.cafe paid mints: the XRP payment and the 0-XRP NFT delivery are separate transactions.
+// Consecutive payments plus the NFTs delivered right after them form a batch; the batch total is split evenly.
+// Returns mint payments for which no NFT arrived.
+function matchPaidMints(txs,rows){
+  const H3=3*3600,H24=24*3600;
+  const pays=txs.filter(t=>t.tx.TransactionType==="Payment").map(t=>({type:"pay",ts:t.date+RIPPLE_EPOCH,
+    amount:drops(t.meta.delivered_amount),fee:drops(t.tx.Fee),hash:t.hash}));
+  const recs=rows.filter(r=>r.kind==="receive"&&CAFE_MINTERS.has(r.counterparty)).map(r=>({type:"nft",ts:r.ts,row:r}));
+  const events=[...pays,...recs].sort((a,b)=>a.ts-b.ts||(a.type==="pay"?-1:1));
+  const batches=[];let cur=null;
+  for(const e of events){
+    if(e.type==="pay"){
+      if(cur&&!cur.nfts.length&&e.ts-cur.lastPay<=H3)cur.pays.push(e);
+      else{cur={pays:[e],nfts:[]};batches.push(cur)}
+      cur.lastPay=e.ts;
+    }else if(cur){
+      const gap=e.ts-cur.lastPay;
+      // normal delivery within 3h; a delayed delivery (up to 24h) only if nothing has arrived yet,
+      // and the rest of that delivery burst (NFTs arriving within 15 min of each other)
+      if(gap<=H3||(!cur.nfts.length&&gap<=H24)||(cur.nfts.length&&e.ts-cur.lastNft<=900)){cur.nfts.push(e.row);cur.lastNft=e.ts}
+    }
+  }
+  for(const b of batches){
+    const n=b.nfts.length;if(!n)continue;
+    const total=b.pays.reduce((s,p)=>s+p.amount,0);
+    const payList=b.pays.map(p=>`${jstShort(p.ts)} ${round6(p.amount)} XRP`).join(" + ");
+    // split in drops; the last NFT takes the remainder so the parts add up exactly to what was paid
+    const split=(xrp,i)=>{const d=Math.round(xrp*1e6),base=Math.floor(d/n);return(i<n-1?base:d-base*(n-1))/1e6};
+    const payFeeTotal=b.pays.reduce((s,p)=>s+p.fee,0);
+    b.nfts.forEach((r,i)=>{
+      const parts=[["ミント代送金の手数料",split(payFeeTotal,i)]];
+      if(r.fee)parts.push(["受取手数料",r.fee]);
+      Object.assign(r,{kind:"paidmint",price:split(total,i),ccy:"XRP",feeCcy:"XRP",feeParts:parts,
+        fee:round6(parts.reduce((s,p)=>s+p[1],0)),cafe:true,payHashes:b.pays.map(p=>p.hash),
+        mintNote:n>1||b.pays.length>1?`まとめて按分: 送金 ${payList}（合計 ${round6(total)} XRP）÷ ${n}個`:`送金 ${payList}`});
+    });
+  }
+  return batches.filter(b=>!b.nfts.length).flatMap(b=>b.pays);
+}
+function jstShort(ts){return new Date((ts+9*3600)*1000).toISOString().slice(0,16).replace("T"," ")}
+
+// IPFS file names may contain '#' or spaces (e.g. "ChibiAnimal#566.json"), which must be escaped in the URL
+const ipfsPath=p=>p.split("/").map(seg=>encodeURIComponent(decodeURIComponentSafe(seg))).join("/");
+function decodeURIComponentSafe(s){try{return decodeURIComponent(s)}catch{return s}}
+function uriToHttp(u){
+  if(!u)return null;
+  if(u.startsWith("ipfs://"))return"https://ipfs.io/ipfs/"+ipfsPath(u.slice(7).replace(/^ipfs\//,""));
+  if(/^https?:\/\//.test(u))return u;
+  if(/^(Qm[1-9A-Za-z]{44}|b[a-z2-7]{50,})/.test(u))return"https://ipfs.io/ipfs/"+ipfsPath(u);
+  return null;
+}
+async function fetchName(uriHex){
+  const u=uriToHttp(hexToStr(uriHex||""));
+  if(!u)return null;
+  const urls=u.startsWith("https://ipfs.io/")?[u,u.replace("https://ipfs.io/","https://gateway.pinata.cloud/")]:[u];
+  for(const url of urls){
+    const ctl=new AbortController();const timer=setTimeout(()=>ctl.abort(),12000);
+    try{const j=await(await fetch(url,{signal:ctl.signal})).json();const n=j.name||(j.collection&&j.collection.name);if(n)return String(n)}
+    catch{}finally{clearTimeout(timer)}
+  }
+  return null;
+}
+
+if(typeof module!=="undefined")module.exports={analyze,fetchHistory,fetchTx,rpc,fetchName,RIPPLE_EPOCH,job};
+</script>
+
+<script>
+const $=id=>document.getElementById(id);
+const SHOW_KINDS=new Set(["buy","sell","receive","mint","paidmint"]);
+const KIND={
+  buy:{label:"買い",cls:"b-buy",cryptact:"買い"},
+  sell:{label:"売り",cls:"b-sell",cryptact:"売り"},
+  mint:{label:"ミント",cls:"b-mint",cryptact:"買い"},
+  paidmint:{label:"有料ミント",cls:"b-mint",cryptact:"買い"},
+  receive:{label:"無償受取",cls:"b-other",cryptact:"ボーナス"},
+  send:{label:"送付（無償）",cls:"b-other",cryptact:"要判断（例: 売り 価格0）"},
+  burn:{label:"バーン",cls:"b-other",cryptact:"要判断（例: 売り 価格0）"},
+  royalty:{label:"ロイヤリティ受取",cls:"b-buy",cryptact:"要判断（XRPの受取収入）"},
+  fee:{label:"手数料のみ",cls:"b-other",cryptact:"要判断（手数料系の種類）"},
+};
+let state={rows:[],names:{},filter:"all",done:new Set()};
+
+(function init(){
+  const today=new Date(Date.now()+9*3600e3).toISOString().slice(0,10);
+  const y=today.slice(0,4);
+  $("from").value=y+"-01-01";$("to").value=today;
+  try{const s=JSON.parse(localStorage.getItem("nftx")||"{}");if(s.addr)$("addr").value=s.addr;if(s.done)state.done=new Set(s.done)}catch{}
+  // names are cached so a custom coin symbol does not change when metadata fails to load next time
+  try{Object.assign(state.names,JSON.parse(localStorage.getItem("nftx_names")||"{}"))}catch{}
+  $("run").onclick=()=>busy?(job.cancelled=true,$("run").textContent="停止中…"):run();
+  $("csvCustom").onclick=downloadCsv;
+})();
+function save(){try{localStorage.setItem("nftx",JSON.stringify({addr:$("addr").value.trim(),done:[...state.done]}))}catch{}}
+
+function jst(ts,sep="-"){const d=new Date((ts+9*3600)*1000).toISOString();return d.slice(0,10).replaceAll("-",sep)+" "+d.slice(11,19)}
+function status(msg,err){const s=$("status");s.textContent=msg;s.className=err?"err":""}
+const fmt=n=>n==null?"":String(Number(n.toFixed(6)));
+
+// While a fetch runs, the main button turns into a stop button
+let busy=false;
+function setBusy(on){
+  busy=on;job.cancelled=false;
+  $("run").textContent=on?"停止する":"抽出する";
+  $("run").classList.toggle("stop",on);
+}
+function failMsg(e){return e.message===CANCELLED?"停止しました":"エラー: "+e.message}
+
+async function run(){
+  const addr=$("addr").value.trim();
+  if(!/^r[1-9A-HJ-NP-Za-km-z]{24,34}$/.test(addr))return status("XRPLアドレス（r...）を入力してください",true);
+  const fromTs=Math.floor(new Date($("from").value+"T00:00:00+09:00")/1000);
+  const toTs=Math.floor(new Date($("to").value+"T23:59:59+09:00")/1000);
+  if(!(fromTs<=toTs))return status("期間を確認してください",true);
+  save();
+  setBusy(true);
+  rpc.onWait=ms=>status(`公開ノードの回数制限のため ${Math.ceil(ms/1000)}秒待機中…（自動で再開します）`);
+  try{
+    status("取引履歴を取得中…");
+    // acquisitions of NFTs sold in the range can predate it, so optionally read the whole history
+    const txs=await fetchHistory(addr,fromTs,toTs,(page,n,oldest)=>{
+      status(`取引履歴を取得中… ${page}ページ目 / NFT関連 ${n}件`+(oldest?` / ${jst(oldest+RIPPLE_EPOCH).slice(0,10)}まで遡り`:""));
+    });
+    status(`NFT関連 ${txs.length}件を解析中…`);
+    const{rows,uris,unpaidMints}=await analyze(addr,txs,{linkOfferFees:$("optFees").checked});
+    state.unpaid=unpaidMints.filter(p=>p.ts>=fromTs);
+    // only the three kinds needed for Cryptact input: buy, sell, free receive
+    attachAcquisitions(rows);
+    state.rows=rows.filter(r=>SHOW_KINDS.has(r.kind)&&r.ts>=fromTs);state.uris=uris;state.addr=addr;
+    Object.assign(state,{txs:[...txs],minLedger:txs.minLedger,complete:txs.complete,fromTs,acqLoading:false});
+    render();
+    status(doneMsg());
+    $("results").style.display="block";
+    if($("optNames").checked)loadNames();
+  }catch(e){status(failMsg(e),e.message!==CANCELLED)}
+  finally{setBusy(false)}
+}
+
+async function loadNames(){
+  const ids=[...new Set(state.rows.map(r=>r.nft).filter(Boolean))].filter(id=>!(id in state.names));
+  let i=0;
+  const worker=async()=>{while(i<ids.length){const id=ids[i++];state.names[id]=await fetchName(state.uris[id]);status(`NFT名を取得中… ${i}/${ids.length}`)}};
+  await Promise.all([worker(),worker(),worker(),worker()]);
+  try{const known=Object.fromEntries(Object.entries(state.names).filter(([,v])=>v));localStorage.setItem("nftx_names",JSON.stringify(known))}catch{}
+  status(doneMsg());
+  render();
+}
+
+function doneMsg(){
+  const u=state.unpaid||[];
+  return `完了: ${state.rows.length}件`+(u.length?` ／ ⚠ NFTが届いていないミント代の送金 ${u.length}件: `+u.map(p=>`${jst(p.ts).slice(0,16)} ${fmt(p.amount)} XRP`).join(", "):"");
+}
+// For each sale, the latest way the same NFT came into this account before it
+const ACQ_KINDS=new Set(["buy","paidmint","mint","receive"]);
+function attachAcquisitions(rows){
+  const byNft={};
+  for(const r of rows)if(r.nft&&ACQ_KINDS.has(r.kind))(byNft[r.nft]=byNft[r.nft]||[]).push(r);
+  for(const r of rows){
+    if(r.kind!=="sell")continue;
+    const prev=(byNft[r.nft]||[]).filter(a=>a.ts<r.ts);
+    r.acq=prev.length?prev[prev.length-1]:null;
+  }
+}
+function acqText(r){
+  const a=r.acq;
+  if(!a)return state.complete?"取得履歴なし（別のアドレスで取得した可能性）":"";
+  return `${KIND[a.kind].label} ${jst(a.ts).slice(0,16)} / 価格 ${fmt(a.price)} ${a.ccy} / 手数料 ${fmt(a.fee)} ${a.feeCcy||"XRP"}`;
+}
+// Sales whose acquisition predates the range: read older history only until those NFTs show up
+async function loadOlder(){
+  if(state.acqLoading)return;
+  const need=new Set(state.rows.filter(r=>r.kind==="sell"&&!r.acq).map(r=>r.nft));
+  if(!need.size||busy)return;
+  setBusy(true);
+  state.acqLoading=true;render();
+  const addr=state.addr,found=new Set();let cutoff=null;
+  try{
+    const older=await fetchHistory(addr,0,state.fromTs,(page,n,oldest)=>{
+      status(`取得履歴を遡って取得中… ${page}ページ目 / 見つかった ${found.size}/${need.size}件`+(oldest?` / ${jst(oldest+RIPPLE_EPOCH).slice(0,10)}まで`:""));
+    },{ledgerMax:state.minLedger,stopAfter:t=>{
+      const id=t.meta&&(t.meta.nftoken_id||t.tx.NFTokenID);
+      if(id&&need.has(id))found.add(id);
+      const ts=t.date+RIPPLE_EPOCH;
+      // keep one more day after the last hit so a paid-mint payment just before it is included
+      if(found.size===need.size&&cutoff===null)cutoff=ts-MINT_PAY_LOOKBACK;
+      return cutoff!==null&&ts<cutoff;
+    }});
+    const seen=new Set(state.txs.map(t=>t.hash));
+    state.txs=[...older.filter(t=>!seen.has(t.hash)),...state.txs].sort((a,b)=>a.date-b.date);
+    state.minLedger=Math.min(state.minLedger,older.minLedger);
+    if(older.complete)state.complete=true;
+    status("解析中…");
+    const{rows,uris,unpaidMints}=await analyze(addr,state.txs,{linkOfferFees:$("optFees").checked});
+    attachAcquisitions(rows);
+    state.rows=rows.filter(r=>SHOW_KINDS.has(r.kind)&&r.ts>=state.fromTs);
+    Object.assign(state.uris,uris);
+    state.unpaid=unpaidMints.filter(p=>p.ts>=state.fromTs);
+    status(doneMsg());
+    if($("optNames").checked)loadNames();
+  }catch(e){status(failMsg(e),e.message!==CANCELLED)}
+  finally{setBusy(false);state.acqLoading=false;render()}
+}
+function coinName(r){
+  if(!r.nft)return"";
+  return state.names[r.nft]||("NFT"+r.nft.slice(-8));
+}
+// Cryptact custom coin symbols allow only half-width A-Z, 0-9 and '#', up to 120 chars
+function coinSymbol(r){
+  if(!r.nft)return"";
+  const idTail="NFT"+r.nft.slice(-8).toUpperCase();
+  const name=(state.names[r.nft]||"").normalize("NFKC");
+  let sym=name.toUpperCase().replace(/[^A-Z0-9#]/g,"");
+  // names in Japanese etc. would lose most of their characters, so prefix the NFT id to keep it unique
+  if(/[^\x00-\x7F]/.test(name))sym=idTail+sym;
+  return(sym||idTail).slice(0,120);
+}
+// Free receives are entered as a bonus at 0 without fees
+const noFee=r=>r.kind==="receive";
+
+function render(){
+  const rows=state.rows;
+  const sum=(k,f)=>rows.filter(r=>r.kind===k).reduce((s,r)=>s+(f?r.fee:r.price),0);
+  const xrp=rows.filter(r=>r.ccy==="XRP");
+  $("stats").innerHTML=[
+    ["買い",rows.filter(r=>r.kind==="buy").length+"件",fmt(xrp.filter(r=>r.kind==="buy").reduce((s,r)=>s+r.price,0))+" XRP"],
+    ["売り",rows.filter(r=>r.kind==="sell").length+"件",fmt(xrp.filter(r=>r.kind==="sell").reduce((s,r)=>s+r.price,0))+" XRP"],
+    ["無償受取",rows.filter(r=>r.kind==="receive").length+"件",""],
+    ["ミント",rows.filter(r=>r.kind==="mint").length+"件",""],
+    ["有料ミント",rows.filter(r=>r.kind==="paidmint").length+"件",fmt(sum("paidmint"))+" XRP"],
+    ["手数料合計","",fmt(rows.filter(r=>!noFee(r)&&(r.feeCcy||"XRP")==="XRP").reduce((s,r)=>s+r.fee,0))+" XRP"],
+  ].map(([k,a,b])=>`<div class="stat"><small>${k}</small><b>${a||b}</b>${a&&b?`<span class="sub">${b}</span>`:""}</div>`).join("");
+  $("rcount").textContent=`${rows.length}件`;
+
+  const kinds=["all",...Object.keys(KIND).filter(k=>rows.some(r=>r.kind===k))];
+  $("filters").innerHTML=kinds.map(k=>`<span class="filter ${state.filter===k?"on":""}" data-k="${k}">${k==="all"?"すべて":KIND[k].label} ${k==="all"?rows.length:rows.filter(r=>r.kind===k).length}</span>`).join("")
+    +`<span class="filter ${state.filter==="cafe"?"on":""}" data-k="cafe">xrp.cafeのみ ${rows.filter(r=>r.cafe).length}</span>`;
+  $("filters").querySelectorAll(".filter").forEach(el=>el.onclick=()=>{state.filter=el.dataset.k;render()});
+
+  const owners={};
+  for(const r of rows)if(r.nft)(owners[coinSymbol(r)]=owners[coinSymbol(r)]||new Set()).add(r.nft);
+  const pending=rows.filter(r=>!state.done.has(r.hash+r.kind)).length;
+  $("csvCustom").textContent=`クリプタクト用CSV（未入力 ${pending}件）`;
+  const shown=rows.filter(r=>state.filter==="all"||(state.filter==="cafe"?r.cafe:r.kind===state.filter));
+  $("list").innerHTML=shown.map((r,i)=>{
+    const k=KIND[r.kind];
+    const f=[
+      ["種類",k.cryptact],
+      ["日時 (Asia/Tokyo)",jst(r.ts)],
+      ["取引量",r.kind==="fee"||r.kind==="royalty"?"—":"1"],
+      ["主軸通貨（カスタムコイン）",r.kind==="royalty"?"XRP":(coinSymbol(r)||"—")],
+      ["価格",fmt(r.price)],
+      ["決済通貨",noFee(r)?"JPY":r.ccy],
+      ["手数料",noFee(r)?"（入力しない）":fmt(r.fee)],
+      ["手数料通貨",noFee(r)?"（入力しない）":r.feeCcy||"XRP"],
+      ["コメント",commentOf(r)],
+      ...(r.kind==="sell"?[["取得時（参考）",acqText(r)]]:[]),
+    ];
+    const breakdown=!noFee(r)&&r.feeParts&&r.feeParts.length?"手数料内訳: "+r.feeParts.map(([a,b])=>`${a} ${fmt(b)}`).join(" + "):"";
+    const warn=r.mixedFee?`<span class="w">※価格がトークン建てのため、XRPのネットワーク手数料が同じ通貨として合算されています。分けて入力してください。</span> `:"";
+    const mint=r.mintNote?`有料ミント（${esc(r.mintNote)}）<br>`:"";
+    const symWarn=symbolWarning(r,owners);
+    const symNote=symWarn?`<span class="w">⚠ 主軸通貨: ${esc(symWarn)}</span><br>`:"";
+    return `<div class="tx ${state.done.has(r.hash+r.kind)?"done":""}">
+      <div class="tx-head">
+        <span class="badge ${k.cls}">${k.label}</span>
+        ${r.cafe?'<span class="cafe">xrp.cafe</span>':""}
+        <span class="when">${jst(r.ts)}</span>
+        <span class="spacer"></span>
+        <a class="txlink" href="https://livenet.xrpl.org/transactions/${r.hash}" target="_blank" rel="noopener">tx↗</a>
+        <label class="chk"><input type="checkbox" data-done="${r.hash+r.kind}" ${state.done.has(r.hash+r.kind)?"checked":""}>入力済</label>
+      </div>
+      <div class="fields">${f.map(([a,b])=>a==="取得時（参考）"&&!b
+        ?`<div class="f acq wide"><div class="k">${a}</div><div class="v"><a href="#" class="acq-link">${state.acqLoading?"読み込み中…":"取得原価がわからない場合"}</a></div></div>`
+        :`<div class="f${a==="コメント"||a==="取得時（参考）"?" wide":""}" data-v="${esc(b)}"><div class="k">${a}</div><div class="v">${esc(b)}</div></div>`).join("")}</div>
+      ${breakdown||warn||mint||symNote?`<div class="note">${symNote}${mint}${warn}${breakdown}</div>`:""}
+    </div>`}).join("")||`<p class="none-msg">該当する取引はありません</p>`;
+  $("list").querySelectorAll(".acq-link").forEach(el=>el.onclick=e=>{e.preventDefault();loadOlder()});
+  $("list").querySelectorAll(".f:not(.acq)").forEach(el=>el.onclick=()=>{
+    navigator.clipboard&&navigator.clipboard.writeText(el.dataset.v);
+    el.classList.add("copied");setTimeout(()=>el.classList.remove("copied"),900);
+  });
+  $("list").querySelectorAll("[data-done]").forEach(el=>el.onchange=()=>{
+    el.checked?state.done.add(el.dataset.done):state.done.delete(el.dataset.done);save();
+    el.closest(".tx").classList.toggle("done",el.checked);
+    $("csvCustom").textContent=`クリプタクト用CSV（未入力 ${state.rows.filter(r=>!state.done.has(r.hash+r.kind)).length}件）`;
+  });
+}
+function commentOf(r){
+  const parts=[];
+  if(r.cafe)parts.push("xrp.cafe");
+  if(r.nft)parts.push(r.nft);
+  if(r.kind==="fee")parts.push(r.why);
+  if(r.kind==="paidmint")parts.push("有料ミント");
+  parts.push("tx:"+r.hash.slice(0,12));
+  return parts.join(" ");
+}
+function esc(s){return String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+
+// Cryptact custom file (https://support.cryptact.com/hc/ja/articles/360002571312).
+// Custom coins must be written as USER-<symbol>; comments must not contain ' " \ so they stay ASCII without commas.
+// Rows already marked 入力済 are left out so manual entries are not uploaded twice.
+function downloadCsv(){
+  const map={buy:"BUY",sell:"SELL",mint:"BUY",paidmint:"BUY",receive:"BONUS"};
+  const rows=state.rows.filter(r=>map[r.kind]&&!state.done.has(r.hash+r.kind));
+  if(!rows.length)return alert("出力する行がありません（すべて入力済です）");
+  const warns=symbolWarnings(rows);
+  if(warns.length&&!confirm("主軸通貨名に確認が必要な行があります。\n\n"+warns.slice(0,8).join("\n")+(warns.length>8?`\n…ほか${warns.length-8}件`:"")+"\n\nこのまま出力しますか？"))return;
+  const lines=[["Timestamp","Action","Source","Base","Volume","Price","Counter","Fee","FeeCcy","Comment"]];
+  for(const r of rows){
+    const bonus=noFee(r);
+    lines.push([jst(r.ts,"/"),map[r.kind],r.cafe?"xrp.cafe":"xrpl","USER-"+coinSymbol(r),"1",fmt(r.price),
+      bonus?"JPY":r.ccy,bonus?"0":fmt(r.fee),bonus?"JPY":r.feeCcy||"XRP",
+      `${r.kind==="paidmint"?"paid-mint ":""}nft:${r.nft} tx:${r.hash}`]);
+  }
+  const blob=new Blob(["\ufeff"+lines.map(l=>l.join(",")).join("\n")],{type:"text/csv"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+  a.download=`cryptact_nft_${state.addr.slice(0,8)}_${$("from").value}_${$("to").value}.csv`;a.click();
+}
+// Symbols that may not identify one NFT: name not loaded (placeholder), digits only, or shared by different NFTs
+function symbolWarnings(rows){
+  const owners={};
+  for(const r of state.rows)if(r.nft)(owners[coinSymbol(r)]=owners[coinSymbol(r)]||new Set()).add(r.nft);
+  const out=[];
+  for(const r of rows){const w=symbolWarning(r,owners);if(w)out.push(`${jst(r.ts).slice(0,16)} ${coinSymbol(r)}: ${w}`)}
+  return out;
+}
+function symbolWarning(r,owners){
+  if(!r.nft)return"";
+  const sym=coinSymbol(r);
+  if(!state.names[r.nft])return"NFT名を取得できず仮の名前です。名前の取得後に再出力してください";
+  if(owners&&owners[sym]&&owners[sym].size>1)return"同じ名前の別のNFTがあります";
+  if(/^[0-9#]+$/.test(sym))return"数字だけの名前です。他のコレクションと重なる可能性があります";
+  return"";
+}
+</script>
+
+<script>
+// ===== XRPL tab: registered wallets, FXRP (FAssets) mint/redeem, wallet-to-wallet transfers =====
+(()=>{
+const $=id=>document.getElementById(id);
+const MAX_WALLETS=20;
+// FXRP Core Vault on the XRP Ledger (multisig controlled by the FAssets system)
+const CORE_VAULT="rfkXSaCZKTg1EZzec2rLDyrWHxRVJdtVXj";
+const FLARE_API="https://flare-explorer.flare.network/api";
+const FLARE_TX="https://flare-explorer.flare.network/tx/";
+// FXRP also existed on Songbird (FAssets v1.0/1.1, before Flare mainnet in Sep 2025); agent mints and redemptions are looked up there too
+const NETS={
+  Flare:{name:"Flare",api:FLARE_API,tx:FLARE_TX,am:["0x2a3Fe068cD92178554cabcf7c95ADf49B4B0B6A8"]},
+  Songbird:{name:"Songbird",api:"https://songbird-explorer.flare.network/api",tx:"https://songbird-explorer.flare.network/tx/",
+    am:["0x299d678f67e7ADD4efdf295Ebe0E92FCb4f75C4c","0x5d5269CC556B9352028c9bB85e6d1ca2e7d45485"]},
+};
+const FLARE_MAINNET_FXRP=1758672000; // 2025-09-24: FXRP live on Flare mainnet
+const netOrder=ts=>ts<FLARE_MAINNET_FXRP?[NETS.Songbird,NETS.Flare]:[NETS.Flare,NETS.Songbird];
+const FL={assetManager:"0x2a3Fe068cD92178554cabcf7c95ADf49B4B0B6A8",coreVaultManager:"0x6c8d96dEfE4cbEE05FA969Fc0Ac436d94Fc21784"};
+const TOPIC={
+  paymentConfirmed:"0x1f3e668bb811ddbb5d21cb9a522ce3d3852133a5b412b8a1c2c450ab44476819",   // CoreVaultManager, topic1 = XRPL tx hash
+  mintingExecuted:"0x0d418f2ae12260f9d0ceacf72b08fcc4b05560719443f40d3761ee90da0d8fa5",    // AssetManager, topic2 = collateral reservation id
+  redemptionRequested:"0x8cbbd73a8d1b8b02a53c4c3b0ee34b472fe3099cc19bcfb57f1aae09e8a9847e",// AssetManager, topic3 = redemption request id
+};
+const DUST=1e-9;
+const SCAM_XRP=0.01; // XRP received from a stranger below this is dust spam
+const XS={wallets:[],events:[],filter:"all",done:new Set(),busy:false};
+const validAddr=a=>/^r[1-9A-HJ-NP-Za-km-z]{24,34}$/.test(a||"");
+const short=a=>a?a.slice(0,6)+"…"+a.slice(-4):"";
+const uba=v=>Number(v)/1e6;
+const fmt=n=>n==null?"":String(Number(Number(n).toFixed(6)));
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const jst=(ts,sep="-")=>{const d=new Date((ts+9*3600)*1000).toISOString();return d.slice(0,10).replaceAll("-",sep)+" "+d.slice(11,19)};
+const store={get(k,d){try{return JSON.parse(localStorage.getItem(k)||"null")??d}catch{return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}};
+
+// ---------- wallets ----------
+function loadWallets(){
+  XS.wallets=store.get("xtax_wallets",[]);
+  if(!XS.wallets.length){const nft=store.get("nftx",{});XS.wallets=[{label:"メイン",address:nft.addr||"",tag:""}]}
+}
+function saveWallets(){store.set("xtax_wallets",XS.wallets);fillCafePick()}
+function renderWallets(){
+  $("wlist").innerHTML=XS.wallets.map((w,i)=>`<div class="wrow" data-i="${i}">
+    <input class="wl" placeholder="名前（例: メイン）" value="${esc(w.label)}">
+    <button type="button" class="wd" title="削除">×</button>
+    <input class="wa${w.address&&!validAddr(w.address)?" bad":""}" placeholder="r..." spellcheck="false" value="${esc(w.address)}">
+    <input class="wt" placeholder="宛先タグ" inputmode="numeric" value="${esc(w.tag)}">
+  </div>`).join("");
+  $("wlist").querySelectorAll(".wrow").forEach(row=>{
+    const w=XS.wallets[+row.dataset.i];
+    row.querySelector(".wl").oninput=e=>{w.label=e.target.value;saveWallets()};
+    row.querySelector(".wa").oninput=e=>{w.address=e.target.value.trim();e.target.classList.toggle("bad",!!w.address&&!validAddr(w.address));saveWallets()};
+    row.querySelector(".wt").oninput=e=>{w.tag=e.target.value.replace(/\D/g,"");e.target.value=w.tag;saveWallets()};
+    row.querySelector(".wd").onclick=()=>{XS.wallets.splice(+row.dataset.i,1);saveWallets();renderWallets()};
+  });
+  $("wAdd").disabled=XS.wallets.length>=MAX_WALLETS;
+}
+function exportWallets(){
+  const blob=new Blob([JSON.stringify({app:"xrpl-tax",version:2,wallets:XS.wallets,tokens:TOK,book:BOOK},null,2)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="xrpl-tax-wallets.json";a.click();
+}
+function importWallets(file){
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const j=JSON.parse(r.result);const list=(j.wallets||j).filter(w=>w&&typeof w.address==="string").slice(0,MAX_WALLETS)
+        .map(w=>({label:String(w.label||""),address:w.address.trim(),tag:String(w.tag||"").replace(/\D/g,"")}));
+      if(!list.length)return alert("ウォレットが見つかりませんでした");
+      const nt=j.tokens&&typeof j.tokens==="object"?Object.keys(j.tokens).length:0,nb=j.book&&typeof j.book==="object"?Object.keys(j.book).length:0;
+      if(!confirm(`${list.length}件のウォレットで置き換えます`+(nt||nb?`（トークン設定 ${nt}件・アドレス帳 ${nb}件も読み込み）`:"")+"。よろしいですか？"))return;
+      XS.wallets=list;saveWallets();renderWallets();
+      if(nt){Object.assign(TOK,j.tokens);store.set("xtax_tokens",TOK)}
+      if(nb){Object.assign(BOOK,j.book);store.set("xtax_book",BOOK)}
+      if(XS.events){buildRows();render()}
+    }catch{alert("読み込めませんでした（JSON形式ではありません）")}
+  };
+  r.readAsText(file);
+}
+// The xrp.cafe tab can pick its address from the registered wallets
+function fillCafePick(){
+  const s=$("addrPick");if(!s)return;
+  const cur=s.value;
+  s.innerHTML=`<option value="">登録済みウォレットから選ぶ</option>`+XS.wallets.filter(w=>validAddr(w.address)&&!w.tag)
+    .map(w=>`<option value="${w.address}">${esc(w.label||"(名前なし)")} ${short(w.address)}</option>`).join("");
+  s.value=cur;
+}
+// A payment belongs to us when the address is registered: with a tag, the tag must match too (exchange deposit)
+function ownerOf(address,tag){
+  if(!address)return null;
+  const t=tag==null?"":String(tag);
+  return XS.wallets.find(w=>w.address===address&&w.tag&&w.tag===t)||XS.wallets.find(w=>w.address===address&&!w.tag)||null;
+}
+const walletName=w=>w?(w.label||short(w.address))+(w.tag?"（取引所）":""):"";
+
+// ---------- XRPL ----------
+// All successful transactions touching the account, newest first → returned oldest first.
+// opts.ledgerMax continues below an earlier fetch; opts.stopAfter(t) ends paging early.
+async function fetchTxs(account,fromTs,toTs,onPage,opts={}){
+  const out=[];let marker,page=0,minLedger=Infinity,complete=false,stop=false;
+  while(true){
+    checkCancel();
+    const p={account,limit:400,forward:false,ledger_index_min:-1,ledger_index_max:opts.ledgerMax??-1,api_version:2};
+    if(marker)p.marker=marker;
+    const r=await rpc("account_tx",p);
+    for(const raw of r.transactions||[]){
+      const t=normalize(raw);const ts=t.date+RIPPLE_EPOCH;
+      if(ts<fromTs){stop=true;break}
+      if(ts>=fromTs)minLedger=Math.min(minLedger,t.ledger);
+      if(ts>toTs||!t.meta||t.meta.TransactionResult!=="tesSUCCESS")continue;
+      out.push(t);
+      if(opts.stopAfter&&opts.stopAfter(t))stop=true;
+    }
+    onPage&&onPage(++page,out.length);
+    if(!r.marker){complete=true;break}
+    if(stop)break;
+    marker=r.marker;
+  }
+  const res=out.reverse();res.minLedger=minLedger;res.complete=complete;
+  return res;
+}
+// Economic balance changes of one account in one transaction (the account's own tx fee is added back).
+// Trust line balances are stored from the low account's side, so the sign flips for the high account.
+function deltasOf(t,acct){
+  const out=new Map();
+  const add=(key,o,d)=>{const e=out.get(key)||{...o,delta:0};e.delta+=d;out.set(key,e)};
+  for(const n of t.meta.AffectedNodes||[]){
+    const kind=Object.keys(n)[0],v=n[kind];
+    if(v.LedgerEntryType==="AccountRoot"){
+      const f=v.FinalFields||v.NewFields||{};if(f.Account!==acct)continue;
+      const p=v.PreviousFields||{};let d=0;
+      if(kind==="CreatedNode")d=drops(f.Balance);else if(p.Balance!=null)d=drops(f.Balance)-drops(p.Balance);
+      if(t.tx.Account===acct)d+=drops(t.tx.Fee);
+      if(Math.abs(d)>1e-7)add("XRP",{raw:"XRP",code:"XRP",issuer:""},d);
+    }else if(v.LedgerEntryType==="RippleState"){
+      const f=v.FinalFields||v.NewFields||{},p=v.PreviousFields||{};
+      const low=f.LowLimit&&f.LowLimit.issuer,high=f.HighLimit&&f.HighLimit.issuer;
+      if(low!==acct&&high!==acct)continue;
+      const sign=low===acct?1:-1;
+      const fin=Number((f.Balance||{}).value||0);
+      let prev;
+      if(kind==="CreatedNode")prev=0;else if(p.Balance)prev=Number(p.Balance.value);else continue;
+      const d=Number((sign*(fin-prev)).toPrecision(15));if(Math.abs(d)<1e-12)continue;
+      const raw=f.Balance.currency,issuer=low===acct?high:low;
+      // AMM LP tokens use a currency code starting with 0x03
+      add(raw+"."+issuer,{raw,code:decodeCurrency(raw),issuer,lp:raw.length===40&&raw.startsWith("03"),prevBal:sign*prev},d);
+    }
+  }
+  return[...out.values()];
+}
+// Decimal string without exponent, trimmed (prices of cheap tokens need many digits)
+function decStr(x,sig=15){
+  if(x==null||!isFinite(x))return"";
+  if(x===0)return"0";
+  let s=Number(x).toPrecision(sig);
+  if(/e/.test(s))s=Number(s).toFixed(20);
+  if(s.includes("."))s=s.replace(/0+$/,"").replace(/\.$/,"");
+  return s;
+}
+
+// ---------- tokens (Cryptact symbols) ----------
+// Most XRPL tokens are not Cryptact coins: they become custom coins (USER-…), which may only be the base currency.
+// Each token has a Cryptact mode: "custom" (USER-…, the tool supplies the JPY price), "priced" (a Cryptact coin with
+// price data: no USER-, Price left blank) or "noprice" (a Cryptact coin without price data: no USER-, the tool still prices it).
+// Checked tokens are built in below (issuer + code, looked up in Cryptact's coin list); the user's own checks are saved
+// per currency+issuer and override them.
+const KNOWN_TOKENS={
+  "rMxCKbEDwqr76QuheSUMdEGf4B9xJ8m5De|RLUSD":{symbol:"RLUSD",mode:"priced",note:"Ripple USD（Ripple発行）"},
+  "rGm7WCVp9gb4jZHWTEtGUr4dd74z2XuWhE|USDC":{symbol:"USDC",mode:"priced",note:"USD Coin（Circle発行）。クリプタクトのUSDCと同じ価格"},
+  "rCSCManTZ8ME9EoLrSHHYKW8PPwWMgkwr|CSC":{symbol:"CSCXRPL",mode:"priced",note:"CasinoCoin。クリプタクトでは CSCXRPL"},
+  "raP6XZypcFR1WkDzaKjv91FtYRCURvePWW|IGC":{symbol:"IGC",mode:"noprice",note:"In Game Credit。クリプタクトに銘柄あり・価格データなし"},
+  "rpakCr61Q92abPXJnVboKENmpKssWyHpwu|Equilibrium":{symbol:"EQUILIBRIUM",mode:"custom",note:"Equilibrium Games のトークン。クリプタクトのEQと同じ発行元か確認できないためカスタム"},
+};
+const TOK_MODES={custom:"カスタム（USER-）",priced:"対応コイン・価格あり",noprice:"対応コイン・価格なし"};
+const TOK=store.get("xtax_tokens",{});
+const tokKey=d=>d.raw==="XRP"?"XRP":d.raw+"."+d.issuer;
+function defaultSymbol(d){
+  let s=String(d.code||"").normalize("NFKC").toUpperCase().replace(/[^A-Z0-9#]/g,"");
+  if(!s)s="T"+d.issuer.slice(1,7).toUpperCase();
+  return s.slice(0,120);
+}
+function tokenInfo(d){
+  if(d.raw==="XRP")return{key:"XRP",symbol:"XRP",supported:true,priced:true,xrp:true};
+  const key=tokKey(d),saved=TOK[key]||{},known=KNOWN_TOKENS[d.issuer+"|"+d.code];
+  const mode=saved.mode||(saved.supported?"priced":null)||(known&&known.mode)||"custom";
+  return{key,code:d.code,issuer:d.issuer,symbol:saved.symbol||(known&&known.symbol)||(XS.autoSym&&XS.autoSym.get(key))||defaultSymbol(d),
+    mode,supported:mode!=="custom",priced:mode==="priced",checked:saved.mode?"user":known?"builtin":"",note:known&&known.note};
+}
+// Same code from different issuers gets the issuer appended so the coins stay apart
+function assignAutoSymbols(tokens){
+  XS.autoSym=new Map();const bySym=new Map();
+  for(const d of tokens){const s=defaultSymbol(d);(bySym.get(s)||bySym.set(s,new Map()).get(s)).set(tokKey(d),d)}
+  for(const [s,m] of bySym)for(const [k,d] of m)XS.autoSym.set(k,m.size>1?(s+"#"+d.issuer.slice(1,5).toUpperCase()).slice(0,120):s);
+}
+const csvSym=i=>i.supported?i.symbol:"USER-"+i.symbol;
+// FAssets payment reference: "FBPRfA" + 2-byte type + 24-byte id (32 bytes), carried in the memo
+function payRef(tx){
+  for(const m of tx.Memos||[]){
+    const h=(m.Memo.MemoData||"").toUpperCase();
+    if(h.startsWith("464250526641")&&h.length>=64)return{type:h.slice(12,16),id:"0x"+h.slice(16,64).padStart(64,"0")};
+  }
+  return null;
+}
+// Smart Accounts: an instruction is an XRP payment to the operator with a 32-byte memo. The operator fronts the FLR
+// fees on Flare (collateral reservation, executor), and this XRP pays for them, so the whole payment is a fee.
+const SA_OPERATOR="rM2LEysS4isvAJkZFfxKDL5z4aTfWcBTXV";
+const SA_TYPES=["FXRP","Firelight","Upshift"];
+function saInstruction(tx){
+  const h=((tx.Memos||[])[0]||{Memo:{}}).Memo.MemoData||"";
+  if(h.length<2)return"";
+  const b=parseInt(h.slice(0,2),16),type=SA_TYPES[b>>4];
+  return (type?type+"の指示":"指示")+`（コード 0x${h.slice(0,2).toUpperCase()}）`;
+}
+// Payment-level classification (FAssets, Smart Accounts fees, wallet-to-wallet transfers)
+function classify(t){
+  const tx=t.tx,d=t.meta.delivered_amount,isXrp=typeof d==="string";
+  const from=ownerOf(tx.Account),to=ownerOf(tx.Destination,tx.DestinationTag);
+  const ref=payRef(tx);
+  if(from&&isXrp&&tx.Destination===CORE_VAULT){
+    // v1.3 direct mint uses reference types 0018 / 0021 (or a destination tag); other memos are Smart Accounts instructions
+    const direct=(ref&&(ref.type==="0018"||ref.type==="0021"))||!(tx.Memos||[]).length;
+    return{kind:direct?"mint":"smart",via:direct?"v1.3 直接ミント":"Smart Accounts",wallet:from};
+  }
+  if(from&&isXrp&&ref&&ref.type==="0001")return{kind:"mint",via:"エージェント経由（v1.0〜1.2）",agent:true,wallet:from,ref};
+  if(to&&isXrp&&ref&&ref.type==="0002")return{kind:"redeem",via:"エージェントから受取",wallet:to,ref};
+  if(from&&isXrp&&tx.Destination===SA_OPERATOR)return{kind:"safee",via:saInstruction(tx),wallet:from};
+  // a payment to the same address is a currency exchange through the DEX (phase 2), not a transfer
+  if(from&&to&&tx.Account!==tx.Destination)return{kind:"transfer",from,to};
+  return null;
+}
+// Balance-level classification per wallet: AMM deposit/withdraw (LP token moves) or a swap (one asset out, one in)
+// Doppler Finance vaults (Fireblocks custody, auto-compounding): no LP token, so the position is tracked like an AMM
+// with deposits = LEND and withdrawals = RECOVER up to the principal, anything above it = BONUS (the yield).
+const DOPPLER={deposit:"rEPQxsSVER2r4HeVR4APrVCB45K68rqgp2",withdraw:"rGuVpUBfprkb1cmKFGbL8c48fQWT3xEwyZ"};
+function phase2(t,w){
+  const ds=deltasOf(t,w.address);
+  const lp=ds.filter(d=>d.lp),assets=ds.filter(d=>!d.lp);
+  const base={t,hash:t.hash,ts:t.date+RIPPLE_EPOCH,wallet:w,own:t.tx.Account===w.address};
+  if(lp.length===1)return{...base,kind:"amm",pool:lp[0].issuer,lpDelta:lp[0].delta,lpPrev:lp[0].prevBal,assets,label:lp[0].delta>0?"AMM預入":"AMM引出"};
+  const sends=assets.filter(d=>d.delta<-DUST),recv=assets.filter(d=>d.delta>DUST);
+  if(sends.length===1&&recv.length===1)return{...base,kind:"swap",send:sends[0],recv:recv[0]};
+  if(t.tx.TransactionType==="Payment"){
+    const dep=base.own&&t.tx.Destination===DOPPLER.deposit&&sends.length===1&&!recv.length;
+    const wd=!base.own&&t.tx.Account===DOPPLER.withdraw&&recv.length===1&&!sends.length;
+    if(dep||wd){const d=dep?sends[0]:recv[0];return{...base,kind:"amm",vault:"Doppler",pool:"Doppler|"+tokKey(d),lpDelta:0,lpPrev:0,assets:[d],label:dep?"Doppler預入":"Doppler引出"}}
+  }
+  // XRP dust sent by someone else (address poisoning / ad spam): shown as SCAM and skipped
+  if(!sends.length&&recv.length===1&&recv[0].raw==="XRP"&&!base.own&&t.tx.TransactionType==="Payment"&&recv[0].delta<SCAM_XRP)
+    return{...base,kind:"scam",recv:recv[0],from:senderOf(t),memo:memoText(t.tx)};
+  // phase 3: a token came in and nothing went out (airdrop, reward, or a transfer from someone)
+  if(!sends.length&&recv.length===1&&recv[0].raw!=="XRP"&&!/^NFToken/.test(t.tx.TransactionType)){
+    const memo=memoText(t.tx);
+    return{...base,kind:"receipt",recv:recv[0],from:senderOf(t),memo};
+  }
+  // phase 4: plain payments with someone who is not a registered wallet
+  if(t.tx.TransactionType==="Payment"){
+    const memo=memoText(t.tx);
+    if(/NFT mint by xrp\.cafe/i.test(memo))return null; // paid NFT mints belong to the xrp.cafe tab
+    if(!sends.length&&recv.length===1&&recv[0].raw==="XRP"&&!base.own)return{...base,kind:"xin",recv:recv[0],from:senderOf(t),memo,srcTag:t.tx.SourceTag};
+    if(sends.length===1&&!recv.length&&base.own&&sends[0].raw==="XRP"&&/service fee/i.test(memo))return{...base,kind:"svcfee",to:t.tx.Destination,memo,fee:+(-sends[0].delta+drops(t.tx.Fee)).toFixed(6)};
+    if(sends.length===1&&!recv.length&&base.own)return{...base,kind:"xout",send:sends[0],to:t.tx.Destination,tag:t.tx.DestinationTag,memo};
+  }
+  return null;
+}
+function memoText(tx){
+  try{return(tx.Memos||[]).map(m=>hexToStr(m.Memo.MemoData||"")).join(" ").replace(/[^\x20-\x7e\u3000-\u9fff\uff00-\uffef]/g,"").trim().slice(0,80)}catch{return""}
+}
+// Who sent it: the payer of a Payment, or the writer of a cashed Check
+function senderOf(t){
+  if(t.tx.TransactionType==="CheckCash"){
+    const n=(t.meta.AffectedNodes||[]).map(n=>Object.values(n)[0]).find(v=>v.LedgerEntryType==="Check");
+    if(n&&n.FinalFields)return n.FinalFields.Account;
+  }
+  return t.tx.Account;
+}
+
+// ---------- Flare (Blockscout API) ----------
+async function flareGet(q,net=NETS.Flare){
+  let last;
+  for(let i=0;i<4;i++){
+    checkCancel();
+    try{
+      const res=await cancellable(fetch(net.api+q));
+      if(res.ok)return await res.json();
+      last=new Error("Flare API "+res.status);
+    }catch(e){if(e.message===CANCELLED)throw e;last=e}
+    await sleep(1200*(i+1));
+  }
+  throw last;
+}
+const blockCache=new Map();
+async function blockAt(ts,closest,net=NETS.Flare){
+  if(ts>=Math.floor(Date.now()/1000)-60)return"latest";
+  const k=net.name+closest+ts;
+  if(!blockCache.has(k)){
+    const j=await flareGet(`?module=block&action=getblocknobytime&timestamp=${ts}&closest=${closest}`,net);
+    const b=j.result&&j.result.blockNumber;
+    if(!b)throw new Error("Flareのブロック番号を取得できませんでした");
+    blockCache.set(k,b);
+  }
+  return blockCache.get(k);
+}
+async function findFlareTx(address,topic0,pos,value,fromTs,toTs,net=NETS.Flare){
+  const b0=await blockAt(fromTs,"before",net),b1=await blockAt(toTs,"after",net);
+  const j=await flareGet(`?module=logs&action=getLogs&fromBlock=${b0}&toBlock=${b1}&address=${address}&topic0=${topic0}&topic${pos}=${value}&topic0_${pos}_opr=and`,net);
+  const r=Array.isArray(j.result)?j.result:[];
+  return r.length?r[0].transactionHash:null;
+}
+// Decoded events of one Flare transaction: [{name, address, p:{param:value}}]
+async function flareEvents(hash,net=NETS.Flare){
+  const out=[];let q=`/v2/transactions/${hash}/logs`;
+  for(let i=0;i<6&&q;i++){
+    const j=await flareGet(q,net);
+    for(const l of j.items||[]){
+      const d=l.decoded;if(!d)continue;
+      const p={};for(const x of d.parameters||[])p[x.name]=x.value;
+      out.push({name:d.method_call.split("(")[0],address:(l.address&&l.address.hash||"").toLowerCase(),p});
+    }
+    q=j.next_page_params?`/v2/transactions/${hash}/logs?`+new URLSearchParams(j.next_page_params):null;
+  }
+  return out;
+}
+// Smart Accounts personal accounts are contracts whose implementation is "PersonalAccount"
+const paCache=new Map();
+async function isPersonalAccount(addr){
+  if(!addr)return false;
+  const k=addr.toLowerCase();
+  if(!paCache.has(k)){
+    try{const j=await flareGet(`/v2/addresses/${addr}`);paCache.set(k,!!(j.is_contract&&(j.implementations||[]).some(i=>i.name==="PersonalAccount")))}
+    catch(e){if(e.message===CANCELLED)throw e;paCache.set(k,false)}
+  }
+  return paCache.get(k);
+}
+const ZERO="0x0000000000000000000000000000000000000000";
+async function resolveFlare(ev){
+  const ts=ev.ts,hash="0x"+ev.hash.toLowerCase();
+  if(ev.kind==="mint"&&ev.agent){
+    let fx=null,net=null;
+    for(const n of netOrder(ts)){for(const am of n.am){fx=await findFlareTx(am,TOPIC.mintingExecuted,2,ev.ref.id,ts-600,ts+6*3600,n);if(fx){net=n;break}}if(fx)break}
+    if(!fx)return;
+    ev.net=net;
+    const evs=await flareEvents(fx,net);
+    const e=evs.find(x=>x.name==="MintingExecuted"&&BigInt(x.p.collateralReservationId)===BigInt(ev.ref.id));
+    if(!e)return;
+    const minted=evs.find(x=>x.name==="Transfer"&&x.p.from===ZERO&&x.p.value===e.p.mintedAmountUBA);
+    const target=minted?minted.p.to:"";
+    const sa=net===NETS.Flare&&await isPersonalAccount(target);
+    Object.assign(ev,{flareTx:fx,received:uba(e.p.mintedAmountUBA),target,sa,
+      via:sa?"Smart Accounts（エージェント経由）":net===NETS.Songbird?"Songbird（v1.0〜1.1）":ev.via,
+      parts:[["エージェント手数料",uba(e.p.agentFeeUBA)],["プール手数料",uba(e.p.poolFeeUBA)]],resolved:true});
+  }else if(ev.kind==="mint"||ev.kind==="smart"){
+    const fx=await findFlareTx(FL.coreVaultManager,TOPIC.paymentConfirmed,1,hash,ts-600,ts+6*3600);
+    if(!fx)return;
+    const evs=await flareEvents(fx);
+    const smart=evs.find(x=>x.name==="DirectMintingExecutedToSmartAccount");
+    const direct=evs.find(x=>x.name==="DirectMintingExecuted"&&x.p.targetAddress);
+    const account=evs.find(x=>x.name==="DirectMintingExecuted"&&x.p.personalAccount);
+    if(smart){
+      // minted amount includes the executor fee, which the personal account pays out right away
+      const exe=account?uba(account.p.executorFee):0;
+      const target=account?account.p.personalAccount:"";
+      const next=evs.filter(x=>target&&x.address===target.toLowerCase()&&x.name!=="Approved"&&x.name!=="BeaconUpgraded")
+        .map(x=>x.name+(x.p.vault?`（vault ${short(x.p.vault)}）`:""));
+      Object.assign(ev,{kind:"smart",via:"Smart Accounts",flareTx:fx,received:+(uba(smart.p.mintedAmountUBA)-exe).toFixed(6),
+        parts:[["ミント手数料",uba(smart.p.mintingFeeUBA)],["実行手数料",exe]],target,sa:true,next,resolved:true});
+    }else if(direct){
+      Object.assign(ev,{kind:"mint",via:"v1.3 直接ミント",flareTx:fx,received:uba(direct.p.mintedAmountUBA),
+        parts:[["ミント手数料",uba(direct.p.mintingFeeUBA)],["実行手数料",uba(direct.p.executorFeeUBA)]],target:direct.p.targetAddress,resolved:true});
+    }
+  }else if(ev.kind==="redeem"){
+    let fx=null,net=null;
+    for(const n of netOrder(ts)){for(const am of n.am){fx=await findFlareTx(am,TOPIC.redemptionRequested,3,ev.ref.id,ts-3*86400,ts+600,n);if(fx){net=n;break}}if(fx)break}
+    if(!fx)return;
+    ev.net=net;
+    const e=(await flareEvents(fx,net)).find(x=>x.name==="RedemptionRequested"&&BigInt(x.p.requestId)===BigInt(ev.ref.id));
+    if(!e)return;
+    const sa=net===NETS.Flare&&await isPersonalAccount(e.p.redeemer);
+    Object.assign(ev,{flareTx:fx,redeemed:uba(e.p.valueUBA),parts:[["償還手数料",uba(e.p.feeUBA)]],target:e.p.redeemer,sa,
+      via:sa?"Smart Accounts経由":net===NETS.Songbird?"Songbird（v1.0〜1.1）":ev.via,resolved:true});
+  }
+}
+// Cryptact rows for FXRP: REBRAND carries the cost basis (no P&L); the fee goes to a separate DEFIFEE row in XRP
+function build(ev){
+  const tx=ev.t.tx,net=drops(tx.Fee);
+  if(["swap","amm","receipt","scam","xin","xout","svcfee"].includes(ev.kind))return; // these carry their own amounts
+  const d=drops(ev.t.meta.delivered_amount);
+  ev.parts=ev.parts||[];
+  if(ev.kind==="mint"||ev.kind==="smart"){
+    const out=+(d+net).toFixed(6);
+    if(!ev.resolved&&ev.agent){ev.received=Math.floor(d/10)*10;ev.estimated=true} // lot size 10 XRP before v1.3
+    ev.parts.push(["ネットワーク手数料",net]);
+    ev.rebrand={base:"XRP",volume:ev.received??null,counter:"FXRP"};
+    ev.fee=ev.received!=null?+(out-ev.received).toFixed(6):null;
+  }else if(ev.kind==="redeem"){
+    if(!ev.resolved){ev.redeemed=Math.ceil(d/10)*10;ev.estimated=true}
+    ev.rebrand={base:"FXRP",volume:ev.redeemed,counter:"XRP"};
+    ev.fee=+(ev.redeemed-d).toFixed(6);
+  }else if(ev.kind==="safee"){
+    ev.fee=+(d+net).toFixed(6);
+  }else{
+    const a=amt(ev.t.meta.delivered_amount);
+    ev.amount=a.value;ev.ccy=a.currency;ev.fee=net;
+  }
+}
+
+// ---------- AMM: differential accounting (same policy as the Flare tool) ----------
+// deposit = LEND, withdraw = RECOVER up to the principal, anything above it = BONUS,
+// and when the LP position is fully closed, principal that did not come back = LOSS.
+// Positions opened before the period need their earlier deposits, so older history is read until the LP line starts at 0.
+async function ammLookback(amm,walletTxs,fromTs){
+  XS.vaultFull=new Set();
+  for(const {w,txs} of walletTxs){
+    const first=new Map();
+    for(const e of amm.filter(e=>e.wallet===w).sort((a,b)=>a.ts-b.ts))if(!first.has(e.pool))first.set(e.pool,e);
+    const need=new Set([...first].filter(([,e])=>!e.vault&&e.lpPrev>DUST).map(([p])=>p));
+    const vaultAll=amm.some(e=>e.wallet===w&&e.vault&&e.assets[0].delta>0);
+    if(!need.size&&!vaultAll)continue;
+    if(vaultAll)XS.vaultFull.add(w.address);
+    const older=await fetchTxs(w.address,0,fromTs-1,p=>xStatus(`${walletName(w)} のAMMの元本を確認するため、過去の履歴を読み込み中… ${p}ページ目`),{
+      ledgerMax:isFinite(txs.minLedger)?txs.minLedger:undefined,
+      stopAfter:t=>{for(const d of deltasOf(t,w.address))if(d.lp&&need.has(d.issuer)&&d.prevBal<=DUST)need.delete(d.issuer);return need.size===0&&!vaultAll}});
+    for(const t of older){const e=phase2(t,w);if(e&&e.kind==="amm")amm.push(e)}
+  }
+}
+function runAmm(amm){
+  const pos=new Map();
+  const addTo=(m,d,v)=>{const k=tokKey(d),c=m.get(k)||{d,v:0};c.v+=v;m.set(k,c)};
+  for(const e of amm.sort((a,b)=>a.ts-b.ts)){
+    const key=e.wallet.address+"|"+e.pool;
+    const st=pos.get(key)||{pool:e.pool,vault:e.vault,wallet:e.wallet,lp:0,peak:0,principal:new Map(),deposited:new Map(),recovered:new Map(),
+      bonus:new Map(),loss:new Map(),tokens:new Map(),events:0,first:e.ts,last:e.ts,closed:false};
+    pos.set(key,st);st.events++;st.last=e.ts;
+    const rows=[];
+    for(const d of e.assets){
+      st.tokens.set(tokKey(d),d);
+      const k=tokKey(d),cur=st.principal.get(k)||{d,v:0};st.principal.set(k,cur);
+      if(d.delta<0){cur.v+=-d.delta;addTo(st.deposited,d,-d.delta);rows.push({action:"LEND",tok:d,vol:-d.delta});continue}
+      const part=Math.min(d.delta,cur.v),excess=d.delta-part;cur.v-=part;
+      if(part>DUST){addTo(st.recovered,d,part);rows.push({action:"RECOVER",tok:d,vol:part})}
+      if(excess>DUST){addTo(st.bonus,d,excess);rows.push({action:"BONUS",tok:d,vol:excess})}
+    }
+    if(e.lpDelta>0)st.closed=false;
+    st.lp+=e.lpDelta;st.peak=Math.max(st.peak,st.lp);
+    if(e.lpDelta<0&&st.lp<=Math.max(DUST,st.peak*1e-9)){
+      for(const c of st.principal.values())if(c.v>DUST){addTo(st.loss,c.d,c.v);rows.push({action:"LOSS",tok:c.d,vol:c.v});c.v=0}
+      st.lp=0;st.peak=0;st.closed=true;e.closed=true;
+    }
+    e.ammRows=rows;
+  }
+  XS.ledger=[...pos.values()].map(st=>({...st,remaining:st.principal,pair:[...st.tokens.values()].map(d=>tokenInfo(d).symbol).join(" / ")}))
+    .sort((a,b)=>(a.closed-b.closed)||(b.last-a.last));
+}
+
+
+// ---------- JPY valuation (custom tokens): find the XRP value, then XRP→JPY ----------
+// ① a trade with XRP on one side needs no JPY. ② token↔token routed through XRP in the same tx: the bridged XRP.
+// ③ otherwise the token/XRP AMM pool ratio at the ledger before the tx. ④ AMM withdrawals: the payout ratio itself.
+// ⑤ nothing found: left for manual input. XRP→JPY: bitbank XRP/JPY 1-minute close (public API, Japanese exchange).
+const jpyDays=new Map();
+async function xrpJpyAt(ts,gran="1min"){
+  const day=new Date(ts*1000).toISOString().slice(0,10).replace(/-/g,"");
+  const key=gran+day;
+  if(!jpyDays.has(key))jpyDays.set(key,(async()=>{
+    try{const r=await cancellable(fetch(`https://public.bitbank.cc/xrp_jpy/candlestick/${gran}/${day}`));const j=await r.json();return(j.data&&j.data.candlestick&&j.data.candlestick[0]&&j.data.candlestick[0].ohlcv)||[]}
+    catch(e){jpyDays.delete(key);if(e.message===CANCELLED)throw e;return[]}
+  })());
+  const arr=await jpyDays.get(key),t=Math.floor(ts/(gran==="1hour"?3600:60))*(gran==="1hour"?3600000:60000);
+  let best=null;for(const c of arr){if(c[5]<=t)best=c;else break}
+  if(!best&&arr.length)best=arr[0];
+  return best?{jpy:Number(best[3]),at:best[5]}:null;
+}
+async function ammPrice(d,ledger){
+  try{
+    const r=await rpc("amm_info",{asset:{currency:"XRP"},asset2:{currency:d.raw,issuer:d.issuer},ledger_index:ledger-1});
+    const a=r.amm;return{xrp:drops(a.amount)/Number(a.amount2.value),pool:a.account};
+  }catch(e){if(e.message===CANCELLED)throw e;return null}
+}
+// XRP that flowed through consumed offers: each bridged path pays XRP out of one book and into another
+function bridgeXrp(t){
+  let gets=0,pays=0;
+  for(const n of t.meta.AffectedNodes||[]){
+    const v=Object.values(n)[0];
+    if(v.LedgerEntryType!=="Offer"||!v.PreviousFields)continue;
+    const f=v.FinalFields||{},p=v.PreviousFields;
+    if(typeof p.TakerGets==="string")gets+=drops(p.TakerGets)-drops(f.TakerGets||"0");
+    if(typeof p.TakerPays==="string")pays+=drops(p.TakerPays)-drops(f.TakerPays||"0");
+  }
+  return gets>0&&pays>0?(gets+pays)/2:Math.max(gets,pays);
+}
+// Best bid for the token in XRP (someone offering XRP for it) at the ledger before the tx
+async function bookPrice(d,ledger){
+  try{
+    const r=await rpc("book_offers",{taker_gets:{currency:"XRP"},taker_pays:{currency:d.raw,issuer:d.issuer},ledger_index:ledger-1,limit:1});
+    const o=(r.offers||[])[0];if(!o)return null;
+    const pays=typeof o.TakerPays==="object"?Number(o.TakerPays.value):0,gets=drops(o.TakerGets);
+    return pays>0?{xrp:gets/pays}:null;
+  }catch(e){if(e.message===CANCELLED)throw e;return null}
+}
+async function valueEvent(ev){
+  if(ev.kind==="receipt"||ev.kind==="xout"){
+    const d=ev.kind==="xout"?ev.send:ev.recv;
+    let p=null,basis="";
+    const a=await ammPrice(d,ev.t.ledger);
+    if(a){p=a.xrp;basis=`AMM ${short(a.pool)}@${ev.t.ledger-1} ${decStr(p,6)} XRP/${tokenInfo(d).symbol}`}
+    else{const b=await bookPrice(d,ev.t.ledger);if(b){p=b.xrp;basis=`板の買い気配@${ev.t.ledger-1} ${decStr(p,6)} XRP/${tokenInfo(d).symbol}`}}
+    if(p==null)return;
+    const j=await xrpJpyAt(ev.ts,"1hour");if(!j)return;
+    ev.val={[tokKey(d)]:p*j.jpy,basis:`${basis} × bitbank XRP/JPY(1h) ${j.jpy}`};
+    return;
+  }
+  if(ev.kind==="swap"){
+    if(ev.send.raw==="XRP"||ev.recv.raw==="XRP")return;
+    const sv=-ev.send.delta,rv=ev.recv.delta;
+    let xrp=null,basis="";
+    const br=bridgeXrp(ev.t);
+    if(br>0){xrp=br;basis=`XRP経由 ${fmt(br)} XRP`}
+    else for(const [d,a] of [[ev.send,sv],[ev.recv,rv]]){
+      const p=await ammPrice(d,ev.t.ledger);
+      if(p){xrp=a*p.xrp;basis=`AMM ${short(p.pool)}@${ev.t.ledger-1} ${decStr(p.xrp,6)} XRP/${tokenInfo(d).symbol}`;break}
+    }
+    if(xrp==null)return;
+    const j=await xrpJpyAt(ev.ts);if(!j)return;
+    const total=xrp*j.jpy;
+    ev.val={[tokKey(ev.send)]:total/sv,[tokKey(ev.recv)]:total/rv,basis:`${basis} × bitbank XRP/JPY ${j.jpy}`};
+  }else if(ev.kind==="amm"){
+    const x=ev.assets.find(d=>d.raw==="XRP"),toks=ev.assets.filter(d=>d.raw!=="XRP");
+    if(!toks.length)return;
+    const j=await xrpJpyAt(ev.ts);if(!j)return;
+    const val={},bs=[];
+    for(const d of toks){
+      let p=null;
+      if(x&&Math.sign(x.delta)===Math.sign(d.delta)&&Math.abs(d.delta)>DUST){p=Math.abs(x.delta)/Math.abs(d.delta);bs.push(`払い戻し比率 ${decStr(p,6)} XRP/${tokenInfo(d).symbol}`)}
+      else{const a=await ammPrice(d,ev.t.ledger);if(a){p=a.xrp;bs.push(`AMM@${ev.t.ledger-1} ${decStr(p,6)} XRP/${tokenInfo(d).symbol}`)}}
+      if(p!=null)val[tokKey(d)]=p*j.jpy;
+    }
+    if(bs.length)ev.val={...val,basis:bs.join(" / ")+` × bitbank XRP/JPY ${j.jpy}`};
+  }
+}
+
+// ---------- Cryptact rows for swaps / AMM / Smart Accounts fees ----------
+const JPY={symbol:"JPY",supported:true,priced:true,fiat:true};
+const XRPI=()=>tokenInfo({raw:"XRP"});
+// The unsupported (custom) token must be the base currency; two custom tokens need two rows priced in JPY
+function eventRows(ev){
+  if(ev.kind==="swap"){
+    const S=tokenInfo(ev.send),R=tokenInfo(ev.recv),sv=-ev.send.delta,rv=ev.recv.delta;
+    const fee=ev.own?drops(ev.t.tx.Fee):0;
+    let rows;
+    if(S.xrp||(!R.xrp&&S.priced&&!R.priced))rows=[{action:"BUY",base:R,vol:rv,price:sv/rv,counter:S}];
+    else if(R.xrp||R.priced)rows=[{action:"SELL",base:S,vol:sv,price:rv/sv,counter:R}];
+    else{
+      const v=ev.val||{},ps=v[tokKey(ev.send)],pr=v[tokKey(ev.recv)];
+      rows=[{action:"SELL",base:S,vol:sv,price:ps??null,auto:ps!=null,counter:JPY},{action:"BUY",base:R,vol:rv,price:pr??null,auto:pr!=null,counter:JPY}];
+    }
+    // our own network fee goes on the first row in XRP (FeeCcy may differ from the counter currency)
+    rows.forEach((r,i)=>{const x=i===0&&fee>0;r.fee=x?fee:0;r.feeCcy=x?"XRP":"JPY"});
+    return rows;
+  }
+  if(ev.kind==="amm")return(ev.ammRows||[]).map(r=>{
+    const b=tokenInfo(r.tok),v=ev.val&&ev.val[tokKey(r.tok)];
+    return{action:r.action,base:b,vol:r.vol,price:b.priced?"":v??null,auto:!b.priced&&v!=null,counter:JPY,fee:0,feeCcy:"JPY"}});
+  if(ev.kind==="safee")return[{action:"DEFIFEE",base:XRPI(),vol:ev.fee,price:"",counter:JPY,fee:0,feeCcy:"JPY"}];
+  if(ev.kind==="receipt"){
+    const b=tokenInfo(ev.recv),v=ev.val&&ev.val[tokKey(ev.recv)];
+    return[{action:"BONUS",base:b,vol:ev.recv.delta,price:b.priced?"":v??null,auto:!b.priced&&v!=null,counter:JPY,fee:0,feeCcy:"JPY"}];
+  }
+  return[];
+}
+// XRP has 6 decimals; token amounts keep 14 significant digits (drops float noise from principal arithmetic)
+const volStr=r=>r.base.xrp?fmt(r.vol):decStr(r.vol,14);
+// Comment = a short label shown in the table; the CSV appends r.ref (JPY basis + tx hashes) for traceability
+const AMM_WORD={LEND:"預け入れ",RECOVER:"元本の回収",BONUS:"差益",LOSS:"差損"};
+function rowComment(ev,action){
+  if(ev.kind==="swap")return`[DEX] ${tokenInfo(ev.send).symbol} → ${tokenInfo(ev.recv).symbol}`;
+  if(ev.kind==="amm"&&ev.vault)return`[${ev.vault}] ${tokenInfo(ev.assets[0]).symbol} Vault ${AMM_WORD[action]||""}`;
+  if(ev.kind==="amm")return`[AMM] ${ev.assets.map(d=>tokenInfo(d).symbol).join("/")} ${AMM_WORD[action]||(ev.lpDelta>0?"預け入れ":"引き出し")}`;
+  return"[Smart Accounts] 指示の手数料";
+}
+
+// ---------- run ----------
+function xStatus(msg){$("xStatus").textContent=msg}
+function xWarn(msg){const w=$("xWarn");w.textContent=msg||"";w.style.display=msg?"block":"none"}
+function setBusy(on){
+  XS.busy=on;job.cancelled=false;
+  $("xRun").textContent=on?"停止する":"取引を取得する →";
+  $("xRun").classList.toggle("stop",on);
+  $("xLoader").classList.toggle("on",on);
+}
+function stop(){if(XS.busy){job.cancelled=true;$("xRun").textContent="停止中…";xStatus("停止しています…")}}
+async function run(){
+  if(XS.busy)return stop();
+  const readable=XS.wallets.filter(w=>validAddr(w.address)&&!w.tag);
+  if(!readable.length)return xWarn("ウォレット（r...）を1つ以上登録してください");
+  const bad=XS.wallets.filter(w=>w.address&&!validAddr(w.address));
+  if(bad.length)return xWarn(`アドレスの形式が正しくないウォレットがあります: ${bad.map(w=>w.label||w.address).join(", ")}`);
+  const fromTs=Math.floor(new Date($("xFrom").value+"T00:00:00+09:00")/1000);
+  const toTs=Math.floor(new Date($("xTo").value+"T23:59:59+09:00")/1000);
+  if(!(fromTs<=toTs))return xWarn("期間を確認してください");
+  store.set("xtax_period",{from:$("xFrom").value,to:$("xTo").value});
+  xWarn("");setBusy(true);
+  rpc.onWait=ms=>xStatus(`公開ノードの回数制限のため ${Math.ceil(ms/1000)}秒待機中…（自動で再開します）`);
+  try{
+    const walletTxs=[],byHash=new Map();
+    for(const [i,w] of readable.entries()){
+      const txs=await fetchTxs(w.address,fromTs,toTs,(p,n)=>xStatus(`${walletName(w)}（${i+1}/${readable.length}）を読み込み中… ${p}ページ目 / ${n}件`));
+      walletTxs.push({w,txs});
+      for(const t of txs)if(!byHash.has(t.hash))byHash.set(t.hash,t); // a transfer between two wallets shows up in both
+    }
+    // payment-level first (FAssets, Smart Accounts fees, transfers), then balance-level per wallet (DEX, AMM)
+    const events=[],used=new Set(),amm=[],feeOnly=[];
+    for(const t of byHash.values()){
+      if(t.tx.TransactionType!=="Payment")continue;
+      const c=classify(t);if(c){events.push({...c,t,hash:t.hash,ts:t.date+RIPPLE_EPOCH});used.add(t.hash)}
+    }
+    for(const {w,txs} of walletTxs)for(const t of txs){
+      if(used.has(t.hash))continue;
+      const e=phase2(t,w);
+      if(e){(e.kind==="amm"?amm:events).push(e);continue}
+      // our own transaction that moved nothing (trust line, offer placed/cancelled, settings): network fee only
+      // (NFT transactions belong to the xrp.cafe tab)
+      if(t.tx.Account===w.address&&!/^NFToken/.test(t.tx.TransactionType)&&!deltasOf(t,w.address).length)feeOnly.push({t,w});
+    }
+    await ammLookback(amm,walletTxs,fromTs);
+    runAmm(amm,fromTs);
+    events.push(...amm.filter(e=>e.ts>=fromTs));
+    events.sort((a,b)=>a.ts-b.ts);
+    const fx=events.filter(e=>FXRP_KINDS.includes(e.kind));
+    for(const [i,ev] of fx.entries()){
+      xStatus(`Flare側の記録と照合中… ${i+1}/${fx.length}`);
+      try{await resolveFlare(ev)}catch(e){if(e.message===CANCELLED)throw e;ev.error=e.message}
+    }
+    events.forEach(build);
+    const toks0=[];for(const e of events){if(e.kind==="swap")toks0.push(e.send,e.recv);if(e.kind==="amm")toks0.push(...e.assets);if(e.kind==="receipt")toks0.push(e.recv);if(e.kind==="xout")toks0.push(e.send)}
+    assignAutoSymbols(toks0.filter(d=>d.raw!=="XRP"));
+    const toValue=events.filter(e=>(e.kind==="swap"&&e.send.raw!=="XRP"&&e.recv.raw!=="XRP")||(e.kind==="amm"&&e.assets.some(d=>d.raw!=="XRP"))||e.kind==="receipt"||(e.kind==="xout"&&e.send.raw!=="XRP"&&!tokenInfo(e.send).priced));
+    let next=0,doneN=0;
+    const worker=async()=>{while(next<toValue.length){const ev=toValue[next++];await valueEvent(ev);xStatus(`円換算の価格を調べています… ${++doneN}/${toValue.length}`)}};
+    await Promise.all([worker(),worker(),worker(),worker()]);
+    const toks=[];
+    for(const e of events){if(e.kind==="swap")toks.push(e.send,e.recv);if(e.kind==="amm")toks.push(...e.assets);if(e.kind==="receipt")toks.push(e.recv);if(e.kind==="xout")toks.push(e.send)}
+    assignAutoSymbols(toks.filter(d=>d.raw!=="XRP"));
+    XS.events=events;XS.feeOnly=feeOnly;
+    buildRows();
+    render();
+    const miss=fx.filter(e=>!e.resolved).length;
+    xWarn(miss?`⚠ Flare側の記録が見つからなかったFXRPの取引が ${miss}件あります（推定値のため「要確認」にしています）`:"");
+  }catch(e){xWarn(e.message===CANCELLED?"停止しました。期間やウォレットを直して、もう一度取得してください。":"エラー: "+e.message)}
+  finally{setBusy(false)}
+}
+
+// ---------- rows (one row = one Cryptact entry, like the Flare tool) ----------
+const FXRP_KINDS=["mint","smart","redeem"];
+const ACTION_OPTIONS={BUY:"BUY (買い)",SELL:"SELL (売り)",REBRAND:"REBRAND (リブランド)",BONUS:"BONUS (ボーナス)",LOSS:"LOSS (損失/費用)",
+  DEFIFEE:"DEFIFEE (DeFi手数料)",SENDFEE:"SENDFEE (送金手数料)",LEND:"LEND (貸コイン)",RECOVER:"RECOVER (貸コイン回収)",
+  REDUCE:"REDUCE (在庫減少)",PAY:"PAY (支払い)",STAKING:"STAKING (ステーキング報酬)",LENDING:"LENDING (貸しコイン収入)"};
+const FIXED=s=>({symbol:s,supported:true,priced:true,xrp:s==="XRP"});
+function commentOf(ev){
+  const what=ev.kind==="redeem"?"償還":ev.kind==="smart"?"ミント（Smart Accounts）":ev.agent?"ミント":"ミント（v1.3）";
+  return `[FXRP${ev.net===NETS.Songbird?" Songbird":""}] ${what}`;
+}
+const refOf=(ev,basis)=>[basis?`JPY: ${basis}`:"",`xrpl:${ev.hash.slice(0,12)}`+(ev.flareTx?` ${ev.net===NETS.Songbird?"sgb":"flare"}:${ev.flareTx.slice(0,12)}`:"")].filter(Boolean).join(" / ");
+function fxrpInfo(ev){
+  const out=[esc(ev.via||"")];
+  if(ev.fee!=null&&ev.parts&&ev.parts.length)out.push("手数料内訳: "+ev.parts.filter(p=>p[1]).map(([a,b])=>`${a} ${fmt(b)}`).join(" + ")+" XRP");
+  if(ev.kind==="redeem")out.push(`FXRP ${fmt(ev.redeemed)} → XRP ${fmt(drops(ev.t.meta.delivered_amount))}`);
+  else if(ev.received!=null)out.push(`XRP ${fmt(drops(ev.t.meta.delivered_amount))} → FXRP ${fmt(ev.received)}`);
+  if(ev.target)out.push(`${ev.sa?"スマートアカウント":"Flareアドレス"} ${short(ev.target)}`);
+  if(ev.next&&ev.next.length)out.push("続けて実行: "+esc(ev.next.join(", ")));
+  if(ev.estimated)out.push(`<span class="xw">⚠ Flare側の記録が見つからず推定値です</span>`);
+  else if(!ev.resolved)out.push(`<span class="xw">⚠ Flare側の記録が見つかりませんでした</span>`);
+  return out.filter(Boolean).join(" ・ ");
+}
+// Counterparty address book (like the Flare tool): a label, and "self" for own wallets/exchange accounts → transfer, not income
+const BOOK=store.get("xtax_book",{});
+function registerAddress(addr){
+  const cur=BOOK[addr]||{label:"",self:false};
+  const label=prompt(`このアドレスに名前を付けます（空欄でOKすると登録解除）:\n${addr}`,cur.label);
+  if(label===null)return;
+  if(!label.trim())delete BOOK[addr];
+  else BOOK[addr]={label:label.trim(),self:confirm("自分のウォレット（取引所の自分の口座を含む）として扱いますか？\n\nOK = 自分（送金扱いになり、CSV出力対象から外れます）\nキャンセル = 名前の表示だけ")};
+  store.set("xtax_book",BOOK);buildRows();render();
+}
+function cpHtml(addr){
+  const e=BOOK[addr],w=ownerOf(addr);
+  const name=w?`<strong>${esc(walletName(w))}（登録ウォレット）</strong>`:e?`<strong>${esc(e.label)}${e.self?"（自分）":""}</strong>`:"";
+  return`相手: <span class="xmono">${short(addr)}</span> ${name}${w?"":` <a href="#" class="xreg" data-reg="${addr}">${e?"編集":"登録"}</a>`}`;
+}
+const TX_JA={TrustSet:"トラストライン設定",OfferCreate:"DEXの注文",OfferCancel:"注文の取消",AccountSet:"アカウント設定",SetRegularKey:"キー設定",SignerListSet:"マルチシグ設定",AccountDelete:"アカウント削除",AMMVote:"AMMの手数料投票",AMMBid:"AMMの入札",TicketCreate:"チケット作成",DepositPreauth:"入金許可設定",Payment:"送金"};
+function buildRows(){
+  const rows=[];
+  // a sender that paid the same token 3+ times is a distributor (rewards / airdrops)
+  const freq=new Map();
+  for(const ev of XS.events)if(ev.kind==="receipt"){const k=ev.from+"|"+tokKey(ev.recv);freq.set(k,(freq.get(k)||0)+1)}
+  const push=(ev,o)=>rows.push({ts:ev.ts,hash:ev.hash,wallet:ev.wallet,price:"",fee:"0",feeCcy:"JPY",info:"",flareTx:ev.flareTx,net:ev.net,ref:refOf(ev,o.basis),...o});
+  for(const ev of XS.events){
+    if(FXRP_KINDS.includes(ev.kind)){
+      const r=ev.rebrand,ok=r.volume!=null&&ev.fee!=null,st=ok&&!ev.estimated?"export":"review",info=fxrpInfo(ev);
+      const src=ev.net===NETS.Songbird?"FAssets Songbird":"FAssets";
+      if(XS.fxrpMode!=="rebrand"){
+        // FXRP is treated as XRP in Cryptact (like a bridged coin keeping its symbol): mint/redeem change nothing, only the fee is recorded
+        push(ev,{action:"REBRAND",source:src,base:FIXED(r.base),volume:ok?fmt(r.volume):"",price:"1",counter:FIXED(r.counter),comment:commentOf(ev),status:"skip",badge:"記録不要",
+          info:info+" ・ FXRPはXRPとして扱う設定のため入力不要（Flare側のFXRPもXRPとして記録）"});
+      }else if(ev.kind==="redeem"){
+        // Cryptact refuses FXRP→XRP REBRAND once XRP→FXRP was rebranded in the same averaging period (year).
+        // To keep it P&L-free, the redemption is REDUCE FXRP (no P&L) + BUY XRP at FXRP's average cost (carries the cost basis).
+        const vol=ok?fmt(r.volume):"";
+        push(ev,{action:"REDUCE",source:src,base:FIXED("FXRP"),volume:vol,counter:JPY,comment:commentOf(ev)+"（FXRPを減らす）",status:st,info});
+        push(ev,{action:"BUY",source:src,base:FIXED("XRP"),volume:vol,needPrice:true,counter:JPY,comment:commentOf(ev)+"（XRPに取得価額を引き継ぐ）",status:"review",
+          info:"FXRPの取得価額をそのままXRPへ移すための行",warn:"クリプタクトのポートフォリオに出ているFXRPの平均取得単価（円）を価格に入れてください"});
+      }else push(ev,{action:"REBRAND",source:src,base:FIXED(r.base),volume:ok?fmt(r.volume):"",price:"1",counter:FIXED(r.counter),comment:commentOf(ev),status:st,info});
+      if(ev.fee==null||ev.fee>0)push(ev,{action:"DEFIFEE",source:ev.net===NETS.Songbird?"FAssets Songbird":"FAssets",base:FIXED("XRP"),volume:ev.fee==null?"":fmt(ev.fee),counter:JPY,comment:commentOf(ev).replace(/[^\]]+$/,m=>m.replace(/（.*）/,"")+"手数料"),status:st,info:"FXRPの手数料（XRP）"});
+    }else if(ev.kind==="scam"){
+      push(ev,{action:"BONUS",source:"XRPL",base:FIXED("XRP"),volume:fmt(ev.recv.delta),counter:JPY,comment:"[SCAM] スキャムアカウントからの送金",status:"scam",info:cpHtml(ev.from)});
+    }else if(ev.kind==="svcfee"){
+      push(ev,{action:"DEFIFEE",source:"XRPL",base:FIXED("XRP"),volume:fmt(ev.fee),counter:JPY,comment:"[手数料] ウォレットアプリのサービス手数料",status:"export",
+        info:`${cpHtml(ev.to)} ・ メモ「${esc(ev.memo)}」 ・ 送金額＋ネットワーク手数料`});
+    }else if(ev.kind==="xin"||ev.kind==="xout"){
+      const out=ev.kind==="xout",cp=out?ev.to:ev.from,self=BOOK[cp]&&BOOK[cp].self;
+      const d=out?ev.send:ev.recv,b=tokenInfo(d),vol=Math.abs(d.delta);
+      const v=ev.val&&ev.val[tokKey(d)],price=b.priced?"":v??null;
+      const action=self?"SENDFEE":out?"SELL":ev.memo?"BONUS":"BUY";
+      const hints=[];
+      if(out&&ev.tag!=null)hints.push(`宛先タグ ${ev.tag}（取引所宛かも）`);
+      if(!out&&ev.srcTag!=null)hints.push(`送金元タグ ${ev.srcTag}（取引所からかも）`);
+      if(ev.memo)hints.push(`メモ「${esc(ev.memo)}」`);
+      const warn=self?"":out?"自分の口座宛なら相手を「自分」で登録／支払いなら売却で出力":"自分の口座からなら相手を「自分」で登録／報酬なら出力";
+      push(ev,{action,source:"XRPL",base:b,volume:b.xrp?fmt(vol):decStr(vol,14),price:price===null||price===""?"":decStr(price,10),needPrice:price===null&&!self,auto:v!=null&&!b.priced,
+        counter:JPY,fee:out?fmt(drops(ev.t.tx.Fee)):"0",feeCcy:out?"XRP":"JPY",
+        comment:self?`[送金] 自分の口座${out?"へ":"から"}`:out?`[送金] ${b.symbol}を送金`:`[受取] ${b.symbol}を受け取り`,status:self?"skip":"review",self,
+        info:[cpHtml(cp),...hints].join(" ・ "),warn});
+    }else if(ev.kind==="transfer"){
+      push(ev,{action:"SENDFEE",source:"XRPL",base:FIXED(ev.ccy),volume:decStr(ev.amount),counter:JPY,fee:fmt(ev.fee),feeCcy:"XRP",
+        comment:`[ウォレット間] ${walletName(ev.from)} → ${walletName(ev.to)}`,status:"skip",self:true,from:ev.from,to:ev.to,info:"自分の口座間の移動（入力不要）"});
+    }else{
+      const src=ev.kind==="amm"?(ev.vault?ev.vault:"XRPL AMM"):ev.kind==="swap"?"XRPL DEX":"Smart Accounts";
+      let info="";
+      if(ev.kind==="swap")info=ev.own?"":"他の人の取引で自分の注文が約定";
+      if(ev.kind==="amm")info=ev.vault?"":`プール ${short(ev.pool)}`+(ev.closed?" ・ 全額引き出し（清算）":"");
+      if(ev.kind==="safee")info=`${esc(ev.via)} ・ FLR手数料の立て替え代金`;
+      if(ev.kind==="receipt"){
+        const r=eventRows(ev)[0],self=BOOK[ev.from]&&BOOK[ev.from].self;
+        const distributor=(freq.get(ev.from+"|"+tokKey(ev.recv))||0)>=3,fromIssuer=ev.from===ev.recv.issuer;
+        const jv=ev.val&&ev.val[tokKey(ev.recv)],value=jv!=null?jv*r.vol:null;
+        let st,why="",warn="",tag="[受取]";
+        if(self){st="skip";why="自分の口座からの移動"}
+        else if(r.price===null&&/https?:|www\.|\.(com|io|xyz|app|net)\b|claim|airdrop/i.test(ev.memo||"")){st="scam";tag="[SCAM]"}
+        else if(r.price===null){st="review";warn="価格（円）を入力してください（自動で出せませんでした）"}
+        else if(distributor||fromIssuer){st="export";tag="[配布]";why=fromIssuer?"発行者から":"同じ相手から繰り返し"}
+        else if(value!=null&&value<1){st="scam";tag="[SCAM]"}
+        else if(ev.memo){st="export";tag="[配布]";why="メモ付き"}
+        else{st="review";warn="エアドロか、自分の資産の移動かを確認"}
+        const scam=tag==="[SCAM]",basis=r.auto&&ev.val&&!scam?ev.val.basis:"";
+        push(ev,{action:self?"SENDFEE":"BONUS",source:"XRPL",base:r.base,volume:volStr(r),price:r.price===null||r.price===""?"":decStr(r.price,10),needPrice:r.price===null&&!self&&st!=="scam",auto:r.auto,
+          counter:JPY,fee:"0",feeCcy:"JPY",comment:tag==="[SCAM]"?"[SCAM] スキャムアカウントからの送金":`${tag} ${r.base.symbol}${tag==="[配布]"?"（報酬・エアドロ）":""}`,basis,status:st,self,
+          info:scam?cpHtml(ev.from):[cpHtml(ev.from),why,ev.memo?`メモ「${esc(ev.memo)}」`:""].filter(Boolean).join(" ・ "),warn});
+        continue;
+      }
+      for(const r of eventRows(ev)){
+        const needPrice=r.price===null;
+        const st=r.action==="LEND"||r.action==="RECOVER"?"skip":needPrice?"review":"export";
+        const basis=r.auto&&ev.val?ev.val.basis:"";
+        push(ev,{action:r.action,source:src,base:r.base,volume:volStr(r),price:needPrice||r.price===""?"":decStr(r.price,10),needPrice,auto:r.auto,
+          counter:r.counter,fee:fmt(r.fee),feeCcy:r.feeCcy,comment:rowComment(ev,r.action),basis,status:st,
+          info,warn:needPrice?"価格（円）を入力してください（自動で出せませんでした）":""});
+      }
+    }
+  }
+  for(const {t,w} of XS.feeOnly||[]){
+    rows.push({ts:t.date+RIPPLE_EPOCH,hash:t.hash,wallet:w,action:"DEFIFEE",source:"XRPL",base:FIXED("XRP"),volume:"0",price:"",counter:JPY,
+      fee:fmt(drops(t.tx.Fee)),feeCcy:"XRP",comment:`[手数料のみ] ${TX_JA[t.tx.TransactionType]||t.tx.TransactionType}`,ref:`xrpl:${t.hash.slice(0,12)}`,status:"skip",info:"手数料だけの取引（ネットワーク手数料）"});
+  }
+  rows.sort((a,b)=>a.ts-b.ts);
+  rows.forEach(r=>r.checked=r.status==="export");
+  XS.rows=rows;
+}
+
+// ---------- render ----------
+// Volume × Price = the amount in the counter currency (screen only; Cryptact computes it from the unit price)
+function totalStr(r){
+  const v=Number(r.volume),p=Number(r.price);
+  if(!r.price||!(v>0)||!(p>0))return"";
+  const t=v*p,c=r.counter;
+  if(c.fiat)return`= ${t.toLocaleString("ja-JP",{maximumFractionDigits:t>=100?0:2})}円`;
+  return`= ${c.xrp?fmt(t):decStr(t,10)} ${c.symbol}`;
+}
+function commentDetail(r){
+  const line=[r.wallet&&!r.self?`<b>${esc(walletName(r.wallet))}</b>`:"",r.info].filter(Boolean).join(" ・ ");
+  return(line?`<div class="xinfo">${line}</div>`:"")+(r.warn?`<div class="xinfo xw">⚠ ${esc(r.warn)}</div>`:"")+(r.basis?`<div class="xbasis">円換算: ${esc(r.basis)}</div>`:"");
+}
+const baseHtml=b=>esc(b.symbol)+(b.supported||b.fiat?"":' <span class="xpill">custom</span>');
+function render(){
+  const rows=XS.rows||[];
+  const cnt={export:0,skip:0,review:0,scam:0};let skipFee=0;
+  for(const r of rows){cnt[r.status]++;if(r.status==="skip"&&r.feeCcy==="XRP")skipFee+=Number(r.fee)||0}
+  $("xsTotal").textContent=rows.length;$("xsExport").textContent=cnt.export;$("xsSkip").textContent=cnt.skip;$("xsReview").textContent=cnt.review;
+  $("xsSkipFee").textContent=`（手数料: ${fmt(skipFee)} XRP${cnt.scam?` ／ ほかにSCAM ${cnt.scam}件`:""}）`;
+  $("xtScam").textContent=cnt.scam;$("xtScam").parentElement.hidden=!cnt.scam;
+  $("xtAll").textContent=rows.length;$("xtExport").textContent=cnt.export;$("xtSkip").textContent=cnt.skip;$("xtReview").textContent=cnt.review;
+  $("xStatsCard").hidden=$("xResults").hidden=!rows.length;
+  $("xEmpty").hidden=!!rows.length||!XS.events;
+  // wallet filter: all registered wallets are read together; this only narrows the view (CSV still uses the checked rows)
+  const wf=$("xWalletFilter"),cur=XS.wfilter||"";
+  const ws=[...new Set(rows.flatMap(r=>[r.wallet,r.from,r.to]).filter(Boolean))];
+  wf.innerHTML=`<option value="">すべてのウォレット（${XS.wallets.filter(w=>validAddr(w.address)&&!w.tag).length}件）</option>`+ws.map(w=>`<option value="${w.address}"${w.address===cur?" selected":""}>${esc(walletName(w))}</option>`).join("");
+  const inWallet=r=>!cur||[r.wallet,r.from,r.to].some(w=>w&&w.address===cur);
+  const shown=rows.filter(r=>(XS.filter==="all"||r.status===XS.filter)&&inWallet(r));
+  $("xBody").innerHTML=shown.map(r=>{
+    const i=rows.indexOf(r);
+    const badge=r.self?'<span class="sbadge s-skip">送金(自分)</span>':r.badge?`<span class="sbadge s-skip">${esc(r.badge)}</span>`:`<span class="sbadge s-${r.status}">${r.status.toUpperCase()}</span>`;
+    const opts=Object.entries(ACTION_OPTIONS).map(([v,l])=>`<option value="${v}"${r.action===v?" selected":""}>${l}</option>`).join("");
+    const price=(r.needPrice?`<input class="xprice" data-i="${i}" placeholder="円" value="${esc(r.price)}" inputmode="decimal">`:`<span class="cp">${esc(r.price)}</span>${r.auto?' <span class="xpill xauto">自動</span>':""}`)+`<span class="xtot">${totalStr(r)}</span>`;
+    const links=`<a class="xtxl" href="https://livenet.xrpl.org/transactions/${r.hash}" target="_blank" rel="noopener">${r.hash.slice(0,8)}…</a>`+
+      (r.flareTx?`<br><a class="xtxl" href="${(r.net||NETS.Flare).tx}${r.flareTx}" target="_blank" rel="noopener">${(r.net||NETS.Flare).name}↗</a>`:"");
+    return`<tr class="row-${r.self?"skip":r.status}">
+      <td><input type="checkbox" class="xchk" data-i="${i}"${r.checked?" checked":""}></td>
+      <td>${badge}</td>
+      <td class="cp xdate" data-v="${jst(r.ts)}">${jst(r.ts).replace(" ","<br>")}</td>
+      <td><select class="xact" data-i="${i}">${opts}</select></td>
+      <td class="cp xstack" data-v="${esc(r.base.symbol)}">${baseHtml(r.base)}</td>
+      <td class="cp xnum">${esc(r.volume)}</td>
+      <td class="xstack xnum">${price}</td>
+      <td class="cp" data-v="${esc(r.counter.symbol)}">${baseHtml(r.counter)}</td>
+      <td class="cp xstack xnum" data-v="${esc(r.fee)}">${esc(r.fee)}<span class="xccy">${esc(r.feeCcy)}</span></td>
+      <td class="xcomment"><span class="cp">${esc(r.comment)}</span>${commentDetail(r)}</td>
+      <td>${links}</td>
+    </tr>`}).join("")||`<tr><td colspan="11" class="xnone">表示する行がありません</td></tr>`;
+  $("xBody").querySelectorAll(".xchk").forEach(el=>el.onchange=()=>{rows[+el.dataset.i].checked=el.checked});
+  $("xBody").querySelectorAll(".xact").forEach(el=>el.onchange=()=>{rows[+el.dataset.i].action=el.value});
+  $("xBody").querySelectorAll(".xprice").forEach(el=>el.oninput=()=>{const r=rows[+el.dataset.i];r.price=el.value.replace(/[^\d.]/g,"");el.parentElement.querySelector(".xtot").textContent=totalStr(r);if(r.price&&!r.checked){r.checked=true;el.closest("tr").querySelector(".xchk").checked=true}});
+  $("xBody").querySelectorAll(".xreg").forEach(el=>el.onclick=e=>{e.preventDefault();registerAddress(el.dataset.reg)});
+  $("xBody").querySelectorAll(".cp").forEach(el=>el.onclick=()=>{
+    const v=el.dataset.v??el.textContent;navigator.clipboard&&navigator.clipboard.writeText(v);
+    el.classList.add("copied");setTimeout(()=>el.classList.remove("copied"),800);
+  });
+  renderTokens();renderLedger();
+}
+// Token list with Cryptact symbol / "supported coin" settings (per currency+issuer)
+function renderTokens(){
+  const seen=new Map();
+  for(const e of XS.events||[]){
+    const ds=e.kind==="swap"?[e.send,e.recv]:e.kind==="amm"?e.assets:e.kind==="receipt"?[e.recv]:e.kind==="xout"&&e.send.raw!=="XRP"?[e.send]:[];
+    for(const d of ds)if(d.raw!=="XRP"){const k=tokKey(d);const s=seen.get(k)||{d,n:0};s.n++;seen.set(k,s)}
+  }
+  $("xTokCount").textContent=` — ${seen.size}種`;
+  $("xTokens").innerHTML=[...seen.values()].sort((a,b)=>b.n-a.n).map(({d,n})=>{
+    const i=tokenInfo(d);
+    return`<div class="tokrow" data-k="${esc(i.key)}">
+      <span class="tcode">${esc(d.code)} <span class="xmuted">×${n}</span></span>
+      <a class="tiss" href="https://livenet.xrpl.org/accounts/${d.issuer}" target="_blank" rel="noopener">${short(d.issuer)}</a>
+      <input class="tsym" value="${esc(i.symbol)}" spellcheck="false" title="クリプタクトの主軸通貨名">
+      <select class="tmode xact">${Object.entries(TOK_MODES).map(([v,l])=>`<option value="${v}"${i.mode===v?" selected":""}>${l}</option>`).join("")}</select>
+      <span class="tchk ${i.checked?"ok":""}">${i.checked==="user"?"✓ 確認済み（自分）":i.checked?"✓ 確認済み":"未確認"}</span>
+      ${i.note||!i.checked?`<span class="tnote">${i.note?esc(i.note):'<a href="https://grid.cryptact.com/coins" target="_blank" rel="noopener">クリプタクトの対応コインリストで探す↗</a>（見つからなければカスタムのまま）'}</span>`:""}
+    </div>`}).join("")||`<p class="xhint">トークンはありません</p>`;
+  $("xTokens").querySelectorAll(".tokrow").forEach(row=>{
+    const k=row.dataset.k,save=()=>{
+      const sym=row.querySelector(".tsym").value.normalize("NFKC").toUpperCase().replace(/[^A-Z0-9#]/g,"").slice(0,120);
+      TOK[k]={symbol:sym||undefined,mode:row.querySelector(".tmode").value};
+      store.set("xtax_tokens",TOK);
+      const open=$("xTokWrap").open;buildRows();render();$("xTokWrap").open=open;
+    };
+    row.querySelector(".tsym").onchange=save;
+    row.querySelector(".tmode").onchange=save;
+  });
+}
+// AMM position ledger (like the Flare tool's LP ledger)
+function renderLedger(){
+  const list=XS.ledger||[];
+  $("xLpCard").hidden=!list.length;
+  if(!list.length)return;
+  const open=list.filter(p=>!p.closed).length;
+  $("xLpCount").textContent=`— 運用中 ${open} / 清算済み ${list.length-open}`;
+  const showClosed=$("xShowClosed").checked;
+  const amounts=m=>{const a=[...m].filter(([,v])=>v.v>DUST).map(([,v])=>`${v.d.raw==="XRP"?fmt(v.v):decStr(v.v,10)} ${esc(tokenInfo(v.d).symbol)}`);return a.length?a.join("<br>"):"-"};
+  $("xLpBody").innerHTML=list.filter(p=>showClosed||!p.closed).map(p=>`<tr>
+    <td>${p.closed?'<span class="sbadge s-skip">清算済み</span>':'<span class="sbadge s-review">運用中</span>'}</td>
+    <td>${p.vault?`${esc(p.vault)} ${esc(p.pair)} Vault`:esc(p.pair)}<br><span class="xmuted xsmall">${p.vault?(XS.vaultFull&&XS.vaultFull.has(p.wallet.address)?"全期間の入金から計算":"※期間内の入金のみ（出金があれば過去分もさかのぼります）"):short(p.pool)} ・ ${esc(walletName(p.wallet))}</span></td>
+    <td>${amounts(p.deposited)}</td><td>${amounts(p.recovered)}</td><td><strong>${amounts(p.remaining)}</strong></td>
+    <td>${amounts(p.bonus)}</td><td>${amounts(p.loss)}</td><td>${p.events}</td>
+    <td class="xsmall">${jst(p.first).slice(0,10)}<br>〜${jst(p.last).slice(0,10)}</td></tr>`).join("")
+    ||`<tr><td colspan="9" class="xnone">表示するポジションがありません</td></tr>`;
+}
+// Cryptact custom file (the 10-column header Cryptact accepts). Checked rows only.
+function downloadCsv(){
+  const rows=(XS.rows||[]).filter(r=>r.checked);
+  if(!rows.length)return xWarn("CSVに出力する行を選択してください");
+  const missing=rows.filter(r=>r.needPrice&&!r.price);
+  if(missing.length&&!confirm(`価格（円）が未入力の行が ${missing.length}件あります。これらは出力しません。続けますか？`))return;
+  const clean=s=>String(s??"").replace(/[,"'\\\n]/g," ");
+  // Cryptact accepts exactly these 10 columns (an extra column such as CounterVolume makes the whole file fail)
+  const lines=[["Timestamp","Action","Source","Base","Volume","Price","Counter","Fee","FeeCcy","Comment"].join(",")];
+  for(const r of rows){
+    if(r.needPrice&&!r.price)continue;
+    lines.push([jst(r.ts,"/"),r.action,r.source,r.base.fiat?"JPY":csvSym(r.base),r.volume,r.price,r.counter.fiat?"JPY":csvSym(r.counter),r.fee,r.feeCcy,clean([r.comment,r.ref].filter(Boolean).join(" / "))].join(","));
+  }
+  const blob=new Blob(["﻿"+lines.join("\n")],{type:"text/csv;charset=utf-8"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+  a.download=`xrpl_tax_${$("xFrom").value}_${$("xTo").value}.csv`;a.click();
+}
+
+// ---------- init ----------
+loadWallets();renderWallets();fillCafePick();
+const today=new Date(Date.now()+9*3600e3).toISOString().slice(0,10);
+XS.fxrpMode=store.get("xtax_fxrp_mode","same");
+$("xFxrpMode").value=XS.fxrpMode;
+$("xFxrpMode").onchange=e=>{XS.fxrpMode=e.target.value;store.set("xtax_fxrp_mode",XS.fxrpMode);if(XS.events){buildRows();render()}};
+const per=store.get("xtax_period",null);
+$("xFrom").value=per&&per.from||today.slice(0,4)+"-01-01";$("xTo").value=per&&per.to||today;
+$("wAdd").onclick=()=>{if(XS.wallets.length<MAX_WALLETS){XS.wallets.push({label:"",address:"",tag:""});saveWallets();renderWallets()}};
+$("wExport").onclick=exportWallets;
+$("wImport").onchange=e=>{if(e.target.files[0])importWallets(e.target.files[0]);e.target.value=""};
+$("xRun").onclick=run;
+$("xStop").onclick=stop;
+$("xCsv").onclick=downloadCsv;
+$("xShowClosed").onchange=renderLedger;
+$("xWalletFilter").onchange=e=>{XS.wfilter=e.target.value;render()};
+$("xSeg").querySelectorAll(".seg-btn").forEach(b=>b.onclick=()=>{
+  $("xSeg").querySelectorAll(".seg-btn").forEach(x=>x.classList.toggle("on",x===b));XS.filter=b.dataset.f;render();
+});
+const pick=$("addrPick");if(pick)pick.onchange=()=>{if(pick.value)$("addr").value=pick.value};
+})();
+
+</script>
+
+<script>
+// Tabs (remembered per browser, and addressable as #xrpl / #cafe)
+(()=>{
+  const tabs={xrpl:["tabXrpl","paneXrpl","heroXrpl"],cafe:["tabCafe","paneCafe","heroCafe"]};
+  function show(key){
+    for(const [k,[t,p,h]] of Object.entries(tabs)){
+      const on=k===key;
+      document.getElementById(t).setAttribute("aria-selected",String(on));
+      document.getElementById(p).hidden=!on;document.getElementById(h).hidden=!on;
+    }
+    try{localStorage.setItem("xtax_tab",key)}catch{}
+    try{history.replaceState(null,"","#"+key)}catch{}
+  }
+  document.getElementById("tabXrpl").onclick=()=>show("xrpl");
+  document.getElementById("tabCafe").onclick=()=>show("cafe");
+  let key=location.hash.slice(1);
+  if(!tabs[key]){try{key=localStorage.getItem("xtax_tab")}catch{}}
+  show(tabs[key]?key:"xrpl");
+})();
+
+// Access code lock (a simple lock). Active only when the deploy placed gate.json (never when opened as a local file).
+// The code is NFKC-normalized, trimmed and lower-cased, prefixed with the salt and hashed with SHA-256;
+// scripts/build_site.py must do exactly the same.
+(async()=>{
+  const KEY="xtax_gate",norm=s=>s.normalize("NFKC").trim().toLowerCase();
+  const sha256=async s=>[...new Uint8Array(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s)))].map(b=>b.toString(16).padStart(2,"0")).join("");
+  let cfg=null,saved=null;
+  try{const r=await fetch("gate.json",{cache:"no-cache"});if(r.ok)cfg=await r.json()}catch{}
+  try{saved=localStorage.getItem(KEY)}catch{}
+  if(cfg&&cfg.enabled&&saved!==cfg.hash){
+    document.getElementById("gateIcon").innerHTML=document.querySelector(".brand svg").outerHTML;
+    document.body.classList.add("gated");
+    const gate=document.getElementById("gate"),input=document.getElementById("gateInput");
+    gate.hidden=false;
+    document.getElementById("gateForm").addEventListener("submit",async e=>{
+      e.preventDefault();
+      const h=await sha256(cfg.salt+norm(input.value));
+      if(h===cfg.hash){try{localStorage.setItem(KEY,h)}catch{}gate.hidden=true;document.body.classList.remove("gated")}
+      else{document.getElementById("gateErr").textContent="コードが違います。もう一度お試しください。";input.select()}
+    });
+    input.focus();
+  }
+  document.documentElement.classList.remove("gate-check");
+})();
+</script>
+</body>
+</html>
