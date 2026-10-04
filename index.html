@@ -259,6 +259,12 @@ code{font:700 .72rem var(--mono);background:var(--brand-soft);color:var(--text);
 .xcard.xwide{--w:min(1560px,calc(100vw - 32px));width:var(--w);margin-left:calc((100% - var(--w)) / 2)}
 .xp tbody td.xdate{font-size:.74rem;line-height:1.35}
 .xccy{color:var(--muted);font:700 .66rem var(--sans)}
+.xp .xactc{width:100px;max-width:100px}
+.xp th.xr,.xp td.xqty{text-align:right}
+.xp td.xqty .xnum{font:600 .76rem var(--mono)}
+.xp td.xqty .xsym{font-weight:800;font-size:.74rem}
+.xp td.xqty .xpill{display:table;margin:3px 0 0 auto}
+.xp td.xfee{font-size:.7rem;color:var(--muted)}
 .xtot{display:block;margin-top:3px;color:var(--muted);font:600 .66rem var(--mono)}
 .xtot:empty{display:none}
 /* pills and currency go under the value so the narrow columns don't push the table wider */
@@ -412,7 +418,7 @@ body.gated>*:not(.gate){display:none!important}
       <a href="https://support.cryptact.com/hc/ja/articles/4413123225497" target="_blank" rel="noopener">カスタムコインの作り方↗</a>
       <a href="https://support.cryptact.com/hc/ja/articles/360002571312" target="_blank" rel="noopener">カスタムファイルの作り方↗</a></p>
     <div class="xtable-wrap"><table class="xtx">
-      <thead><tr><th>出力</th><th>Status</th><th>日時</th><th>Action</th><th>Base</th><th>Volume</th><th>Price</th><th>Counter</th><th>Fee</th><th>Comment</th><th>Tx</th></tr></thead>
+      <thead><tr><th>出力</th><th>Status</th><th>日時</th><th>Action</th><th class="xr">数量</th><th>Price</th><th>Counter</th><th>Fee</th><th>Comment</th><th>Tx</th></tr></thead>
       <tbody id="xBody"></tbody>
     </table></div>
   </div>
@@ -1943,6 +1949,13 @@ function buildRows(){
 
 // ---------- render ----------
 // Volume × Price = the amount in the counter currency (screen only; Cryptact computes it from the unit price)
+// Screen-only rounding (full digits stay in the tooltip, the copy value and the CSV):
+// 6 decimals at 1 or more, 6 significant digits below 1, with thousands separators
+function dispNum(s){
+  const n=Number(s);
+  if(s===""||s==null||!isFinite(n))return esc(String(s??""));
+  return Math.abs(n)>=1?n.toLocaleString("en-US",{maximumFractionDigits:6}):n.toLocaleString("en-US",{maximumSignificantDigits:6});
+}
 function totalStr(r){
   const v=Number(r.volume),p=Number(r.price);
   if(!r.price||!(v>0)||!(p>0))return"";
@@ -1974,25 +1987,26 @@ function render(){
   $("xBody").innerHTML=shown.map(r=>{
     const i=rows.indexOf(r);
     const badge=r.self?'<span class="sbadge s-skip">送金(自分)</span>':r.badge?`<span class="sbadge s-skip">${esc(r.badge)}</span>`:`<span class="sbadge s-${r.status}">${r.status.toUpperCase()}</span>`;
-    const opts=Object.entries(ACTION_OPTIONS).map(([v,l])=>`<option value="${v}"${r.action===v?" selected":""}>${l}</option>`).join("");
-    const price=(r.needPrice?`<input class="xprice" data-i="${i}" placeholder="円" value="${esc(r.price)}" inputmode="decimal">`:`<span class="cp">${esc(r.price)}</span>${r.auto?' <span class="xpill xauto">自動</span>':""}`)+`<span class="xtot">${totalStr(r)}</span>`;
+    // Action shows only the code (fixed width); the Japanese meaning is in the tooltip
+    const opts=Object.entries(ACTION_OPTIONS).map(([v,l])=>`<option value="${v}" title="${esc(l)}"${r.action===v?" selected":""}>${v}</option>`).join("");
+    const price=(r.needPrice?`<input class="xprice" data-i="${i}" placeholder="円" value="${esc(r.price)}" inputmode="decimal">`:`<span class="cp" data-v="${esc(r.price)}" title="${esc(r.price)}">${dispNum(r.price)}</span>${r.auto?' <span class="xpill xauto">自動</span>':""}`)+`<span class="xtot">${totalStr(r)}</span>`;
+    const fee=Number(r.fee)?`<span class="cp" data-v="${esc(r.fee)}" title="${esc(r.fee)}">${dispNum(r.fee)}</span><span class="xccy">${esc(r.feeCcy)}</span>`:'<span class="xmuted">–</span>';
     const links=`<a class="xtxl" href="https://livenet.xrpl.org/transactions/${r.hash}" target="_blank" rel="noopener">${r.hash.slice(0,8)}…</a>`+
       (r.flareTx?`<br><a class="xtxl" href="${(r.net||NETS.Flare).tx}${r.flareTx}" target="_blank" rel="noopener">${(r.net||NETS.Flare).name}↗</a>`:"");
     return`<tr class="row-${r.self?"skip":r.status}">
       <td><input type="checkbox" class="xchk" data-i="${i}"${r.checked?" checked":""}></td>
       <td>${badge}</td>
       <td class="cp xdate" data-v="${jst(r.ts)}">${jst(r.ts).replace(" ","<br>")}</td>
-      <td><select class="xact" data-i="${i}">${opts}</select></td>
-      <td class="cp xstack" data-v="${esc(r.base.symbol)}">${baseHtml(r.base)}</td>
-      <td class="cp xnum">${esc(r.volume)}</td>
+      <td><select class="xact xactc" data-i="${i}" title="${esc(ACTION_OPTIONS[r.action]||r.action)}">${opts}</select></td>
+      <td class="xqty"><span class="cp xnum" data-v="${esc(r.volume)}" title="${esc(r.volume)}">${dispNum(r.volume)}</span> <span class="cp xsym" data-v="${esc(r.base.symbol)}">${esc(r.base.symbol)}</span>${r.base.supported||r.base.fiat?"":'<span class="xpill">custom</span>'}</td>
       <td class="xstack xnum">${price}</td>
       <td class="cp" data-v="${esc(r.counter.symbol)}">${baseHtml(r.counter)}</td>
-      <td class="cp xstack xnum" data-v="${esc(r.fee)}">${esc(r.fee)}<span class="xccy">${esc(r.feeCcy)}</span></td>
+      <td class="xstack xnum xfee">${fee}</td>
       <td class="xcomment"><span class="cp">${esc(r.comment)}</span>${commentDetail(r)}</td>
       <td>${links}</td>
-    </tr>`}).join("")||`<tr><td colspan="11" class="xnone">表示する行がありません</td></tr>`;
+    </tr>`}).join("")||`<tr><td colspan="10" class="xnone">表示する行がありません</td></tr>`;
   $("xBody").querySelectorAll(".xchk").forEach(el=>el.onchange=()=>{rows[+el.dataset.i].checked=el.checked});
-  $("xBody").querySelectorAll(".xact").forEach(el=>el.onchange=()=>{rows[+el.dataset.i].action=el.value});
+  $("xBody").querySelectorAll(".xact").forEach(el=>el.onchange=()=>{rows[+el.dataset.i].action=el.value;el.title=ACTION_OPTIONS[el.value]||el.value});
   $("xBody").querySelectorAll(".xprice").forEach(el=>el.oninput=()=>{const r=rows[+el.dataset.i];r.price=el.value.replace(/[^\d.]/g,"");el.parentElement.querySelector(".xtot").textContent=totalStr(r);if(r.price&&!r.checked){r.checked=true;el.closest("tr").querySelector(".xchk").checked=true}});
   $("xBody").querySelectorAll(".xreg").forEach(el=>el.onclick=e=>{e.preventDefault();registerAddress(el.dataset.reg)});
   $("xBody").querySelectorAll(".cp").forEach(el=>el.onclick=()=>{
