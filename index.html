@@ -144,16 +144,18 @@ code{font:700 .72rem var(--mono);background:var(--brand-soft);color:var(--text);
 .tabs button[aria-selected="true"]{background:var(--brand);color:#fff}
 @media(max-width:720px){.appbar-in{flex-wrap:wrap;row-gap:8px}.tabs{order:3;width:100%}.tabs button{flex:1;justify-content:center}}
 .lbl-hint{font-weight:600;color:var(--muted);margin-left:6px}
-.wlist{display:flex;flex-direction:column;gap:6px;margin-top:4px}
-.wrow{display:grid;grid-template-columns:minmax(0,1fr) 84px 30px;gap:5px;padding:7px;border:2px solid var(--brand-soft);border-radius:12px;background:var(--surface)}
+.wlist{display:flex;flex-direction:column;gap:6px;margin-top:4px;overflow-y:auto;overscroll-behavior:contain;padding-right:2px}
+/* PC: one line per wallet (name | address | destination tag | ×); phones go back to two lines */
+.wrow{display:grid;grid-template-columns:170px minmax(0,1fr) 84px 30px;align-items:center;gap:5px;padding:7px;border:2px solid var(--brand-soft);border-radius:12px;background:var(--surface)}
 .wrow input{min-width:0;border:0;border-radius:8px;background:var(--field);color:var(--text);padding:6px 8px;font:700 .78rem var(--mono);outline:none}
 .wrow input:focus{box-shadow:0 0 0 2px var(--brand)}
 .wrow input.bad{box-shadow:0 0 0 2px var(--sell)}
 .wrow .wl{grid-column:1;grid-row:1;font-family:var(--sans)}
-.wrow .wt{grid-column:2;grid-row:1}
-.wrow .wa{grid-column:1/3;grid-row:2}
-.wrow .wd{grid-column:3;grid-row:1/3;border:2px solid var(--line);border-radius:8px;background:var(--surface);color:var(--text);font:900 .9rem var(--sans);cursor:pointer}
+.wrow .wa{grid-column:2;grid-row:1}
+.wrow .wt{grid-column:3;grid-row:1}
+.wrow .wd{grid-column:4;grid-row:1;align-self:stretch;border:2px solid var(--line);border-radius:8px;background:var(--surface);color:var(--text);font:900 .9rem var(--sans);cursor:pointer}
 .wrow .wd:hover{background:var(--sell);color:#fff}
+@media(max-width:540px){.wrow{grid-template-columns:minmax(0,1fr) 84px 30px}.wrow .wl{grid-column:1;grid-row:1}.wrow .wt{grid-column:2;grid-row:1}.wrow .wa{grid-column:1/3;grid-row:2}.wrow .wd{grid-column:3;grid-row:1/3}}
 .wbtns{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
 .mini{border:2px solid var(--line);border-radius:10px;background:var(--surface);color:var(--text);padding:5px 10px;font:800 .7rem var(--sans);cursor:pointer}
 .mini:hover{border-color:var(--brand);color:var(--brand)}
@@ -1209,6 +1211,17 @@ function renderWallets(){
     row.querySelector(".wd").onclick=()=>{XS.wallets.splice(+row.dataset.i,1);saveWallets();renderWallets()};
   });
   $("wAdd").disabled=XS.wallets.length>=MAX_WALLETS;
+  fitWalletList();
+}
+// Show at most 5 wallets; from the 6th the list scrolls inside its box (so the fetch button doesn't keep growing).
+// Row height depends on the font, so it is measured on every render, after web fonts load and on resize.
+const WLIST_VISIBLE=5;
+function fitWalletList(){
+  const list=$("wlist"),rows=list.querySelectorAll(".wrow");
+  if(rows.length<=WLIST_VISIBLE){list.style.maxHeight="";return}
+  if(!list.offsetParent)return; // hidden tab: measured again when the XRPL tab is shown
+  const top=rows[0].getBoundingClientRect().top,bottom=rows[WLIST_VISIBLE-1].getBoundingClientRect().bottom;
+  list.style.maxHeight=Math.ceil(bottom-top)+2+"px";
 }
 function exportWallets(){
   const blob=new Blob([JSON.stringify({app:"xrpl-tax",version:2,wallets:XS.wallets,tokens:TOK,book:BOOK},null,2)],{type:"application/json"});
@@ -2054,13 +2067,21 @@ function downloadCsv(){
 
 // ---------- init ----------
 loadWallets();renderWallets();fillCafePick();
-const today=new Date(Date.now()+9*3600e3).toISOString().slice(0,10);
 XS.fxrpMode=store.get("xtax_fxrp_mode","same");
 $("xFxrpMode").value=XS.fxrpMode;
 $("xFxrpMode").onchange=e=>{XS.fxrpMode=e.target.value;store.set("xtax_fxrp_mode",XS.fxrpMode);if(XS.events){buildRows();render()}};
 const per=store.get("xtax_period",null);
-$("xFrom").value=per&&per.from||today.slice(0,4)+"-01-01";$("xTo").value=per&&per.to||today;
-$("wAdd").onclick=()=>{if(XS.wallets.length<MAX_WALLETS){XS.wallets.push({label:"",address:"",tag:""});saveWallets();renderWallets()}};
+// Empty period → this month (1st to last day), like the Flare tool; a saved period is kept
+{const n=new Date(),ymd=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+ $("xFrom").value=per&&per.from||ymd(new Date(n.getFullYear(),n.getMonth(),1));$("xTo").value=per&&per.to||ymd(new Date(n.getFullYear(),n.getMonth()+1,0))}
+$("wAdd").onclick=()=>{
+  if(XS.wallets.length>=MAX_WALLETS)return;
+  XS.wallets.push({label:"",address:"",tag:""});saveWallets();renderWallets();
+  const list=$("wlist");list.scrollTop=list.scrollHeight;
+  const ls=list.querySelectorAll(".wl");if(ls.length)ls[ls.length-1].focus();
+};
+try{document.fonts.ready.then(fitWalletList)}catch{}
+addEventListener("resize",fitWalletList);
 $("wExport").onclick=exportWallets;
 $("wImport").onchange=e=>{if(e.target.files[0])importWallets(e.target.files[0]);e.target.value=""};
 $("xRun").onclick=run;
@@ -2088,6 +2109,7 @@ const pick=$("addrPick");if(pick)pick.onchange=()=>{if(pick.value)$("addr").valu
     }
     try{localStorage.setItem("xtax_tab",key)}catch{}
     try{history.replaceState(null,"","#"+key)}catch{}
+    dispatchEvent(new Event("resize")); // lets the wallet list re-measure once visible
   }
   document.getElementById("tabXrpl").onclick=()=>show("xrpl");
   document.getElementById("tabCafe").onclick=()=>show("cafe");
