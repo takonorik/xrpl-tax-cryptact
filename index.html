@@ -206,13 +206,16 @@ code{font:700 .72rem var(--mono);background:var(--brand-soft);color:var(--text);
 @keyframes xspin{to{transform:rotate(360deg)}}
 .xwarn{display:none;margin-bottom:20px;padding:12px 14px;border-radius:16px;border:2px solid var(--sell);background:var(--brand-tint);color:var(--sell);font-size:.8rem;font-weight:700;line-height:1.6;white-space:pre-line}
 .xstats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-.xstat{background:var(--field);border-radius:18px;padding:14px 16px;border:2px solid transparent}
+/* 結果の表示なので、ボタンに見えないよう枠や背景は付けず、区切り線だけで並べる */
+.xstat{padding:4px 18px;border-left:2px solid var(--brand-soft)}
+.xstat:first-child{border-left:0;padding-left:4px}
 .xstat .v{font-size:2.2rem;font-weight:900;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.03em}
 .xstat .l{font-size:.68rem;font-weight:800;color:var(--muted);margin-top:6px}
 .xstat .s{font-size:.65rem;color:var(--muted);margin-top:5px;font-family:var(--mono)}
 .x-export .v{color:var(--buy)}
-.x-review{background:var(--brand-tint);border-color:var(--brand)}
-.x-review .v{color:var(--brand)}
+/* 要確認は残っているときだけ色を付ける (0件なら他と同じ控えめな表示) */
+.x-review .v{color:var(--muted)}
+.x-review.has-items .v{color:var(--brand)}
 .x-skip .v{color:var(--muted)}
 .xsub{margin-top:14px;border:2px dashed var(--brand);border-radius:16px;padding:10px 14px;background:var(--brand-tint)}
 .xsub>summary{cursor:pointer;font-size:.8rem;font-weight:900;list-style:none}
@@ -286,7 +289,7 @@ code{font:700 .72rem var(--mono);background:var(--brand-soft);color:var(--text);
 .xnone{text-align:center;color:var(--muted);padding:1rem!important}
 .xempty{text-align:center;padding:28px;margin-bottom:24px;border:2px dashed var(--brand);border-radius:26px;background:var(--brand-tint);color:var(--muted);font-weight:700}
 .xp .help{margin-top:0}
-@media(max-width:900px){.xform{grid-template-columns:minmax(0,1fr)}.xstats{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:900px){.xform{grid-template-columns:minmax(0,1fr)}.xstats{grid-template-columns:repeat(2,1fr);row-gap:14px}.xstat:nth-child(odd){border-left:0;padding-left:4px}}
 @media(max-width:540px){.xcard{padding:14px}.xstat .v{font-size:1.7rem}}
 /* access code lock (a simple lock; only active where the deploy placed gate.json) */
 html.gate-check body>*:not(.gate){visibility:hidden}
@@ -1770,6 +1773,7 @@ async function run(){
   const toTs=Math.floor(new Date($("xTo").value+"T23:59:59+09:00")/1000);
   if(!(fromTs<=toTs))return xWarn("期間を確認してください");
   store.set("xtax_period",{from:$("xFrom").value,to:$("xTo").value});
+  const range={start:$("xFrom").value,end:$("xTo").value}; // the CSV file name uses the period of this fetch, not the inputs at download time
   xWarn("");setBusy(true);
   rpc.onWait=ms=>xStatus(`公開ノードの回数制限のため ${Math.ceil(ms/1000)}秒待機中…（自動で再開します）`);
   try{
@@ -1812,7 +1816,7 @@ async function run(){
     const toks=[];
     for(const e of events){if(e.kind==="swap")toks.push(e.send,e.recv);if(e.kind==="amm")toks.push(...e.assets);if(e.kind==="receipt")toks.push(e.recv);if(e.kind==="xout")toks.push(e.send)}
     assignAutoSymbols(toks.filter(d=>d.raw!=="XRP"));
-    XS.events=events;XS.feeOnly=feeOnly;
+    XS.events=events;XS.feeOnly=feeOnly;XS.range=range; // only once the fetch finished, so a stopped fetch keeps the old rows' name
     buildRows();
     render();
     const miss=fx.filter(e=>!e.resolved).length;
@@ -1973,6 +1977,7 @@ function render(){
   const cnt={export:0,skip:0,review:0,scam:0};let skipFee=0;
   for(const r of rows){cnt[r.status]++;if(r.status==="skip"&&r.feeCcy==="XRP")skipFee+=Number(r.fee)||0}
   $("xsTotal").textContent=rows.length;$("xsExport").textContent=cnt.export;$("xsSkip").textContent=cnt.skip;$("xsReview").textContent=cnt.review;
+  $("xsReview").parentElement.classList.toggle("has-items",cnt.review>0);
   $("xsSkipFee").textContent=`（手数料: ${fmt(skipFee)} XRP${cnt.scam?` ／ ほかにSCAM ${cnt.scam}件`:""}）`;
   $("xtScam").textContent=cnt.scam;$("xtScam").parentElement.hidden=!cnt.scam;
   $("xtAll").textContent=rows.length;$("xtExport").textContent=cnt.export;$("xtSkip").textContent=cnt.skip;$("xtReview").textContent=cnt.review;
@@ -2076,7 +2081,14 @@ function downloadCsv(){
   }
   const blob=new Blob(["﻿"+lines.join("\n")],{type:"text/csv;charset=utf-8"});
   const a=document.createElement("a");a.href=URL.createObjectURL(blob);
-  a.download=`xrpl_tax_${$("xFrom").value}_${$("xTo").value}.csv`;a.click();
+  a.download=`xrpl_tax_${fileRange(rows)}.csv`;a.click();
+}
+// yymmdd_yymmdd from the fetched period; an open end falls back to the first/last exported row
+function fileRange(rows){
+  const days=rows.map(r=>jst(r.ts).slice(0,10)).sort(),range=XS.range||{};
+  const ymd=d=>d?d.replace(/[-/]/g,"").slice(2):"";
+  const from=ymd(range.start||days[0]),to=ymd(range.end||days[days.length-1]);
+  return from&&to?`${from}_${to}`:ymd(new Date().toISOString().slice(0,10));
 }
 
 // ---------- init ----------
