@@ -239,6 +239,13 @@ code{font:700 .72rem var(--mono);background:var(--brand-soft);color:var(--text);
 .seg-n{font:700 .7rem var(--mono);padding:0 7px;border-radius:99px;background:var(--brand-soft);color:var(--brand)}
 .seg-btn.on .seg-n{background:rgba(255,255,255,.25);color:#fff}
 .xtable-wrap{overflow:auto;border:2px solid var(--line);border-radius:18px;max-height:72vh}
+.xselcount{font-size:.74rem;font-weight:800;color:var(--muted);white-space:nowrap}
+.xopts{display:flex;justify-content:flex-end;margin:-4px 0 12px}
+/* PC幅: 取引履歴の中にいる間だけ、操作バーと表の見出しをヘッダー直下に固定する（スクロールはページ全体の1つにする） */
+.x-bar-sticky .xtoolbar{position:sticky;top:var(--appbar-h,58px);z-index:5;background:var(--surface);margin:-10px 0 2px;padding:10px 0}
+.x-sticky .xtable-wrap{max-height:none;overflow:clip}
+.x-sticky .xtable-wrap thead th{top:calc(var(--appbar-h,58px) + var(--xbar-h,64px));z-index:4}
+@media(max-width:1180px){.xp .xcomment{min-width:150px}}
 .xp table{width:100%;border-collapse:collapse;font-size:.8rem}
 .xp thead th{position:sticky;top:0;z-index:1;background:var(--brand-tint);color:var(--muted);font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;text-align:left;padding:10px 9px;border-bottom:2px solid var(--line);white-space:nowrap}
 .xp tbody td{padding:8px 9px;border-bottom:1.5px solid var(--brand-soft);white-space:nowrap;font-variant-numeric:tabular-nums;vertical-align:middle}
@@ -404,7 +411,7 @@ body.gated>*:not(.gate){display:none!important}
 
   <!-- Results -->
   <div class="xcard xwide" id="xResults" hidden>
-    <div class="xtoolbar">
+    <div class="xtoolbar" id="xToolbar">
       <div class="seg" id="xSeg">
         <button class="seg-btn on" data-f="all">すべて<span class="seg-n" id="xtAll">0</span></button>
         <button class="seg-btn" data-f="export">出力対象<span class="seg-n" id="xtExport">0</span></button>
@@ -413,14 +420,15 @@ body.gated>*:not(.gate){display:none!important}
         <button class="seg-btn" data-f="scam" hidden>SCAM<span class="seg-n" id="xtScam">0</span></button>
       </div>
       <div class="xtools-r">
-        <select class="xact" id="xWalletFilter" title="ウォレットで絞り込み"></select>
+        <span class="xselcount" id="xSelCount"></span>
         <button class="btn ghost" id="xCsv">📥 CSVダウンロード</button>
       </div>
     </div>
+    <div class="xopts"><select class="xact" id="xWalletFilter" title="ウォレットで絞り込み"></select></div>
     <p class="xnote xtight">💡 登録したすべてのウォレットをまとめて読み込み、1つの表・1つのCSVにします（右上でウォレットごとに表示を絞り込めます）。チェックした行だけがCSVに出力されます（初期状態は「出力対象」の行）。Actionは行ごとに変更できます。値のセルをクリックするとコピーできるので、手動入力にも使えます。
       <a href="https://support.cryptact.com/hc/ja/articles/4413123225497" target="_blank" rel="noopener">カスタムコインの作り方↗</a>
       <a href="https://support.cryptact.com/hc/ja/articles/360002571312" target="_blank" rel="noopener">カスタムファイルの作り方↗</a></p>
-    <div class="xtable-wrap"><table class="xtx">
+    <div class="xtable-wrap"><table class="xtx" id="xTable">
       <thead><tr><th>出力</th><th>Status</th><th>日時</th><th>Action</th><th class="xr">数量</th><th>Price</th><th>Counter</th><th>Fee</th><th>Comment</th><th>Tx</th></tr></thead>
       <tbody id="xBody"></tbody>
     </table></div>
@@ -1983,6 +1991,7 @@ function render(){
   $("xtAll").textContent=rows.length;$("xtExport").textContent=cnt.export;$("xtSkip").textContent=cnt.skip;$("xtReview").textContent=cnt.review;
   $("xStatsCard").hidden=$("xResults").hidden=!rows.length;
   $("xEmpty").hidden=!!rows.length||!XS.events;
+  selCount();
   // wallet filter: all registered wallets are read together; this only narrows the view (CSV still uses the checked rows)
   const wf=$("xWalletFilter"),cur=XS.wfilter||"";
   const ws=[...new Set(rows.flatMap(r=>[r.wallet,r.from,r.to]).filter(Boolean))];
@@ -2010,15 +2019,16 @@ function render(){
       <td class="xcomment"><span class="cp">${esc(r.comment)}</span>${commentDetail(r)}</td>
       <td>${links}</td>
     </tr>`}).join("")||`<tr><td colspan="10" class="xnone">表示する行がありません</td></tr>`;
-  $("xBody").querySelectorAll(".xchk").forEach(el=>el.onchange=()=>{rows[+el.dataset.i].checked=el.checked});
+  $("xBody").querySelectorAll(".xchk").forEach(el=>el.onchange=()=>{rows[+el.dataset.i].checked=el.checked;selCount()});
   $("xBody").querySelectorAll(".xact").forEach(el=>el.onchange=()=>{rows[+el.dataset.i].action=el.value;el.title=ACTION_OPTIONS[el.value]||el.value});
-  $("xBody").querySelectorAll(".xprice").forEach(el=>el.oninput=()=>{const r=rows[+el.dataset.i];r.price=el.value.replace(/[^\d.]/g,"");el.parentElement.querySelector(".xtot").textContent=totalStr(r);if(r.price&&!r.checked){r.checked=true;el.closest("tr").querySelector(".xchk").checked=true}});
+  $("xBody").querySelectorAll(".xprice").forEach(el=>el.oninput=()=>{const r=rows[+el.dataset.i];r.price=el.value.replace(/[^\d.]/g,"");el.parentElement.querySelector(".xtot").textContent=totalStr(r);if(r.price&&!r.checked){r.checked=true;el.closest("tr").querySelector(".xchk").checked=true}selCount()});
   $("xBody").querySelectorAll(".xreg").forEach(el=>el.onclick=e=>{e.preventDefault();registerAddress(el.dataset.reg)});
   $("xBody").querySelectorAll(".cp").forEach(el=>el.onclick=()=>{
     const v=el.dataset.v??el.textContent;navigator.clipboard&&navigator.clipboard.writeText(v);
     el.classList.add("copied");setTimeout(()=>el.classList.remove("copied"),800);
   });
   renderTokens();renderLedger();
+  layoutSticky(); // the card may have just appeared or the table changed width
 }
 // Token list with Cryptact symbol / "supported coin" settings (per currency+issuer)
 function renderTokens(){
@@ -2083,6 +2093,14 @@ function downloadCsv(){
   const a=document.createElement("a");a.href=URL.createObjectURL(blob);
   a.download=`xrpl_tax_${fileRange(rows)}.csv`;a.click();
 }
+// "CSVに出力: N行（期間）" — rows the CSV will contain (checked, and priced where a price is needed); period of the fetch
+function selCount(){
+  const n=(XS.rows||[]).filter(r=>r.checked&&!(r.needPrice&&!r.price)).length;
+  const d=v=>v?v.replace(/-/g,"/"):"",{start,end}=XS.range||{};
+  const endTxt=start&&end&&start.slice(0,4)===end.slice(0,4)?d(end).slice(5):d(end);
+  const range=start||end?`${d(start)||"最初"}〜${endTxt||"最新"}`:"全期間";
+  $("xSelCount").textContent=`CSVに出力: ${n.toLocaleString()}行（${range}）`;
+}
 // yymmdd_yymmdd from the fetched period; an open end falls back to the first/last exported row
 function fileRange(rows){
   const days=rows.map(r=>jst(r.ts).slice(0,10)).sort(),range=XS.range||{};
@@ -2114,10 +2132,29 @@ $("xRun").onclick=run;
 $("xStop").onclick=stop;
 $("xCsv").onclick=downloadCsv;
 $("xShowClosed").onchange=renderLedger;
-$("xWalletFilter").onchange=e=>{XS.wfilter=e.target.value;render()};
+$("xWalletFilter").onchange=e=>{XS.wfilter=e.target.value;render();toListTop()};
 $("xSeg").querySelectorAll(".seg-btn").forEach(b=>b.onclick=()=>{
-  $("xSeg").querySelectorAll(".seg-btn").forEach(x=>x.classList.toggle("on",x===b));XS.filter=b.dataset.f;render();
+  $("xSeg").querySelectorAll(".seg-btn").forEach(x=>x.classList.toggle("on",x===b));XS.filter=b.dataset.f;render();toListTop();
 });
+// Sticky bar + table header on wide screens: one page scroll instead of the table's own, so the header can stick under the app bar.
+// Phones (or a table wider than its card) keep the in-table scroll; the bar still sticks above 900px.
+function layoutSticky(){
+  const root=document.documentElement.style,card=$("xResults"),wrap=card.querySelector(".xtable-wrap");
+  root.setProperty("--appbar-h",document.querySelector(".appbar").offsetHeight+"px");
+  if(!wrap.clientWidth)return; // hidden
+  const wide=innerWidth>900;
+  card.classList.toggle("x-bar-sticky",wide);
+  card.classList.toggle("x-sticky",wide&&$("xTable").offsetWidth<=wrap.clientWidth+1);
+  root.setProperty("--xbar-h",$("xToolbar").offsetHeight+"px");
+}
+{const run=()=>requestAnimationFrame(layoutSticky);addEventListener("resize",run);
+ if(window.ResizeObserver){const ro=new ResizeObserver(run);["xResults","xToolbar","xTable"].forEach(id=>ro.observe($(id)));ro.observe(document.querySelector(".appbar"))}}
+// after switching the list from further down, go back to its top (bar just under the app bar)
+function toListTop(){
+  const card=$("xResults");if(!card.classList.contains("x-bar-sticky"))return;
+  const top=card.getBoundingClientRect().top+scrollY+8-document.querySelector(".appbar").offsetHeight;
+  if(scrollY>top)scrollTo({top});
+}
 const pick=$("addrPick");if(pick)pick.onchange=()=>{if(pick.value)$("addr").value=pick.value};
 })();
 
