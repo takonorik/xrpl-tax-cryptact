@@ -193,6 +193,8 @@ code{font:700 .72rem var(--mono);background:var(--brand-soft);color:var(--text);
 .xgroup label{display:block;font-size:.68rem;font-weight:800;color:var(--brand);margin-bottom:4px}
 .xgroup input[type=date]{width:100%;border:0;background:transparent;color:var(--text);font:800 1rem var(--sans);outline:none}
 .xgroup .wlist{margin-top:6px}
+.xopt{display:flex;align-items:center;gap:8px;font-size:.8rem;font-weight:800;cursor:pointer}
+.xopt input{accent-color:var(--brand);width:16px;height:16px;flex-shrink:0;margin:0}
 .btn.xfetch{flex:1;margin:0;min-height:52px}
 .btn.xfetch.stop,.btn.stop{background:var(--sell);color:#fff}
 .xnote{background:var(--brand-tint);border-radius:16px;padding:10px 14px;margin-top:12px;font-size:.74rem;font-weight:500;color:var(--muted);line-height:1.7}
@@ -212,6 +214,8 @@ code{font:700 .72rem var(--mono);background:var(--brand-soft);color:var(--text);
 .xstat .v{font-size:2.2rem;font-weight:900;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.03em}
 .xstat .l{font-size:.68rem;font-weight:800;color:var(--muted);margin-top:6px}
 .xstat .s{font-size:.65rem;color:var(--muted);margin-top:5px;font-family:var(--mono)}
+.xcheck{margin-top:12px;font-size:.74rem;font-weight:700;color:var(--muted);line-height:1.6}
+.xcheck.ok{color:var(--buy)}
 .x-export .v{color:var(--buy)}
 /* 要確認は残っているときだけ色を付ける (0件なら他と同じ控えめな表示) */
 .x-review .v{color:var(--muted)}
@@ -338,7 +342,7 @@ body.gated>*:not(.gate){display:none!important}
 <header class="hero"><div class="hero-in">
   <div id="heroXrpl">
     <h1 class="catch">XRPLの取引を、<em>クリプタクト</em>の入力欄ごとに。</h1>
-    <p class="lead">登録したウォレットと期間から、FXRPのミント・償還（Smart Accounts含む）、DEXのスワップ、AMM・Doppler Vaultの預け入れ・引き出し、トークンの受け取り（報酬・エアドロ）、登録していない相手との送受金、ウォレット間の送金を読み取ります。FXRPの手数料はFlare側の記録と照合して正確に出します。NFT（xrp.cafeなど）の取引はここには含まれないので、<a href="#cafe" onclick="document.getElementById('tabCafe').click();return false">xrp.cafeタブ</a>を見てください。</p>
+    <p class="lead">登録したウォレットと期間から、FXRPのミント・償還（Smart Accounts含む）、DEXのスワップ、AMM・Doppler Vaultの預け入れ・引き出し、トークンの受け取り（報酬・エアドロ）、登録していない相手との送受金、ウォレット間の送金を読み取ります。FXRPの手数料はFlare側の記録と照合して正確に出します。NFT（xrp.cafeなど）の取引は、「NFTの売買も出力する」にチェックを入れるとこの表にも入ります（<a href="#cafe" onclick="document.getElementById('tabCafe').click();return false">xrp.cafeタブ</a>と同じ判定）。</p>
   </div>
   <div id="heroCafe" hidden>
   <h1 class="catch">NFTの売買を、<em>クリプタクト</em>の入力欄ごとに。</h1>
@@ -365,6 +369,7 @@ body.gated>*:not(.gate){display:none!important}
         <div class="xgroup"><label for="xTo">終了日</label><input type="date" id="xTo"></div>
         <div class="xgroup"><label for="xFxrpMode">FXRPの記録</label><select id="xFxrpMode" class="xmode" title="FXRPをクリプタクトでどう扱うか">
           <option value="same">XRPとして扱う（推奨）</option><option value="rebrand">FXRPに切り替える（リブランド）</option></select></div>
+        <label class="xgroup xopt" title="xrp.cafeタブと同じ判定で、NFTの購入・売却・ミント・無償受取もこの表とCSVに入れます"><input type="checkbox" id="xNft"> NFTの売買も出力する（xrp.cafeなど）</label>
         <button class="btn xfetch" id="xRun">取引を取得する →</button>
       </div>
     </div>
@@ -386,6 +391,7 @@ body.gated>*:not(.gate){display:none!important}
       <div class="xstat x-skip"><div class="v" id="xsSkip">0</div><div class="l">スキップ</div><div class="s" id="xsSkipFee"></div></div>
       <div class="xstat x-review"><div class="v" id="xsReview">0</div><div class="l">要確認</div></div>
     </div>
+    <div class="xcheck" id="xCheck" hidden></div>
     <details class="xsub" id="xTokWrap">
       <summary>🪙 トークン一覧と設定（Cryptact対応チェック用）<span id="xTokCount"></span></summary>
       <p class="xhint">XRPLのトークンの多くはクリプタクトの未対応コインなので、カスタムコイン（CSVでは <code>USER-…</code>）として出力します。クリプタクトの対応コインリストにあるものは<b>対応コイン</b>にします：<b>価格あり</b>なら価格欄は空欄（クリプタクトの価格を使用）、<b>価格なし</b>ならこのツールが円価格を付けます。調べた結果はこのブラウザに保存され（「ファイルに保存」にも含まれます）、次回から「✓ 確認済み」になります。よく使うトークンは確認済みとして組み込んであります。主軸通貨名は変更できます（半角英大文字・数字・#）。</p>
@@ -446,12 +452,16 @@ body.gated>*:not(.gate){display:none!important}
       <li><b>円換算のルール</b>（カスタムコインに価格が必要な行）：まずXRP建ての価値を、① 取引の片方がXRPならその額（円換算は不要）、② トークン同士でも同じ取引の中でXRPを経由して約定していれば、その経由したXRPの量、③ それもなければ、そのトークンとXRPのAMMプールの、取引の直前のレジャー時点の比率、④ AMMの引き出しは払い戻された比率、の順で決めます。XRPから円へは、bitbankのXRP/JPYの1分足の終値を使います。自動で出した価格には「自動」の印が付き、根拠をコメントに残します。⑤ どれも取れない場合は「要確認」で手入力です。</li>
       <li><b>AMM</b>は差分計上：預け入れ＝LEND、引き出し＝元本までRECOVER（どちらもスキップ）、元本を超えた分＝BONUS、全額引き出し時に戻らなかった元本＝LOSS（出力対象）。カスタムコインのBONUS/LOSSは価格（円）が必要なので要確認です。</li>
       <li><b>Doppler Finance のVault</b>（XRP / RLUSD）もAMMと同じ差分計上です：入金口座 <code>rEPQxs…</code> への送金＝LEND、出金口座 <code>rGuVpU…</code> からの受取＝元本までRECOVER、超えた分（自動複利の利息）＝BONUS。出金があると、元本を出すため過去の入金をすべてさかのぼって読みます。</li>
+      <li><b>NFT</b>（「NFTの売買も出力する」にチェックしたとき）：xrp.cafeタブと同じ判定で、購入・ミント・有料ミント＝BUY、売却＝SELL、無償受取＝BONUS（価格0・JPY）にします。主軸通貨はNFT名から作るカスタムコイン（<code>USER-…</code>）です。登録したウォレット同士の移動はスキップ、xrp.cafeタブで「入力済」にした取引は「入力済」としてスキップします。xrp.cafeタブのCSVを取り込んだ期間は、二重にならないようこちらでは外してください。ほかに、約定しなかったオファー・オファーの取消などの手数料は「[手数料のみ]」、バーンと無償での送付は手数料だけの行（どちらもスキップ。取得原価のあるNFTなら在庫の減少を手で入力）、発行者として受け取ったロイヤリティはXRPのBONUS（要確認）になります。</li>
       <li><b>トークンの受け取り</b>（何も出さずにトークンだけ入ったもの）はボーナス（BONUS）です。メモ付きの配布、同じ相手から3回以上の配布（ステーキング報酬など）、発行者からの配布は「出力対象」（少額でも報酬として計上）、1回だけで1円未満のもの・市場価格がなくメモでサイトに誘導するものは「SCAM」（スキップ）、それ以外（メモなしの単発）は取引所や人からの送金かもしれないので「要確認」にします。相手のアドレスは行の「登録」から名前を付けられ、「自分」にするとその相手からの受け取りは送金扱い（スキップ）になります。価格は上の円換算ルール（AMM、なければ板の買い気配。XRP/JPYは報酬が毎日届くことが多いので1時間足）で自動で入れます。</li>
       <li><b>SCAM</b>：見知らぬ相手からの0.01 XRP未満の送金（アドレスを似せた詐欺や宣伝）と、上のスパム的なトークンの受け取りです。CSVには出さず、「SCAM」タブにまとめます。こうした相手のアドレスには送金しないよう注意してください。</li>
       <li><b>FXRPのSongbird分</b>：Flareメインネットで始まる前（2025年9月以前）のSongbird上のFXRP（FAssets v1.0〜1.1）のミント・償還も、Songbird側の記録と照合します（Sourceは「FAssets Songbird」）。</li>
       <li><b>サービス手数料</b>：メモに「Service Fee」とある送金（Xamanの手数料など）は、DeFi手数料として出力します。</li>
       <li><b>登録していない相手との送受金</b>（Flare側ツールと同じ扱い）：XRPの受け取りは BUY（メモ付きは BONUS）、送金は SELL で、どちらも「要確認」です。自分の取引所やウォレットとの移動なら、行の「登録」で相手を「自分」にするとスキップ（送金扱い）になります。宛先タグ付きの送金は取引所の入金先の可能性が高いです。XRPの価格は空欄（クリプタクトの時価）、カスタムコインを送った場合は円換算ルールで価格を入れます。xrp.cafeの有料ミントの代金はxrp.cafeタブで扱うので、ここには出しません。</li>
-      <li><b>ウォレット間送金</b>（登録したウォレット同士、取引所の入金先を含む）と、手数料だけの取引（トラストライン設定・注文の取消など）はスキップです。</li>
+      <li><b>ウォレット間送金</b>（登録したウォレット同士、取引所の入金先を含む）と、手数料だけの取引（トラストライン設定・注文の取消など）はスキップです。<b>失敗した取引</b>（結果が tec… のもの）も、何も動きませんがネットワーク手数料はかかるので、「[手数料のみ]」の行（スキップ）で出します。</li>
+      <li><b>自動で判定できない取引</b>（いくつもの通貨が同時に動いたもの、エスクロー・チェック・ペイメントチャネル、AMMの預け入れ・引き出し以外でのLPトークンの移動など）は捨てずに、動いた残高ごとに「要確認」の行（増えた＝BUY、減った＝SELL）にします。内容を見てActionを選んでください。</li>
+      <li><b>カスタムコインの主軸通貨名</b>は、トークンごとに最初に付けた名前をこのブラウザに保存し、次からも同じ名前にします（月ごとにCSVを作っても同じコインのまま）。同じ名前で発行元が違うトークンには、発行元アドレスの4文字（先頭の r の次から）を付けて区別します（例: <code>ABC#XYZW</code>）。「ファイルに保存」にも含まれます。</li>
+      <li><b>残高の検算</b>：取得のあと、ウォレットごとに「期間の前の残高＋読み込んだ取引の増減＝期間の後の残高」になるかをレジャーの記録で確かめ、集計の下に結果を出します。ずれていたら読み込みに漏れがあるかもしれないので、もう一度取得してください。</li>
       <li>クリプタクトのDeFi連携などで、Flare側のFXRPのミントが取り込まれている場合は二重になるので除外してください。データ元：XRPL（s2.ripple.com）、Flare（flare-explorer.flare.network）。税務上の最終判断はご自身または税理士の確認のうえで行ってください。</li>
     </ul>
   </details>
@@ -948,6 +958,7 @@ function failMsg(e){return e.message===CANCELLED?"停止しました":"エラー
 async function run(){
   const addr=$("addr").value.trim();
   if(!/^r[1-9A-HJ-NP-Za-km-z]{24,34}$/.test(addr))return status("XRPLアドレス（r...）を入力してください",true);
+  const range={start:$("from").value,end:$("to").value}; // the CSV file name uses the period of this fetch
   const fromTs=Math.floor(new Date($("from").value+"T00:00:00+09:00")/1000);
   const toTs=Math.floor(new Date($("to").value+"T23:59:59+09:00")/1000);
   if(!(fromTs<=toTs))return status("期間を確認してください",true);
@@ -966,7 +977,7 @@ async function run(){
     // only the three kinds needed for Cryptact input: buy, sell, free receive
     attachAcquisitions(rows);
     state.rows=rows.filter(r=>SHOW_KINDS.has(r.kind)&&r.ts>=fromTs);state.uris=uris;state.addr=addr;
-    Object.assign(state,{txs:[...txs],minLedger:txs.minLedger,complete:txs.complete,fromTs,acqLoading:false});
+    Object.assign(state,{txs:[...txs],minLedger:txs.minLedger,complete:txs.complete,fromTs,range,acqLoading:false});
     render();
     status(doneMsg());
     $("results").style.display="block";
@@ -1153,7 +1164,9 @@ function downloadCsv(){
   }
   const blob=new Blob(["\ufeff"+lines.map(l=>l.join(",")).join("\n")],{type:"text/csv"});
   const a=document.createElement("a");a.href=URL.createObjectURL(blob);
-  a.download=`cryptact_nft_${state.addr.slice(0,8)}_${$("from").value}_${$("to").value}.csv`;a.click();
+  // same form as the XRPL tab: yymmdd_yymmdd of the fetched period
+  const ymd=d=>(d||"").replace(/[-/]/g,"").slice(2),r=state.range||{start:$("from").value,end:$("to").value};
+  a.download=`xrpcafe_nft_${ymd(r.start)}_${ymd(r.end)}.csv`;a.click();
 }
 // Symbols that may not identify one NFT: name not loaded (placeholder), digits only, or shared by different NFTs
 function symbolWarnings(rows){
@@ -1196,7 +1209,7 @@ const TOPIC={
   mintingExecuted:"0x0d418f2ae12260f9d0ceacf72b08fcc4b05560719443f40d3761ee90da0d8fa5",    // AssetManager, topic2 = collateral reservation id
   redemptionRequested:"0x8cbbd73a8d1b8b02a53c4c3b0ee34b472fe3099cc19bcfb57f1aae09e8a9847e",// AssetManager, topic3 = redemption request id
 };
-const DUST=1e-9;
+const NOISE=1e-12; // relative size below which a difference is float / ledger rounding noise
 const SCAM_XRP=0.01; // XRP received from a stranger below this is dust spam
 const XS={wallets:[],events:[],filter:"all",done:new Set(),busy:false};
 const validAddr=a=>/^r[1-9A-HJ-NP-Za-km-z]{24,34}$/.test(a||"");
@@ -1241,7 +1254,7 @@ function fitWalletList(){
   list.style.maxHeight=Math.ceil(bottom-top)+2+"px";
 }
 function exportWallets(){
-  const blob=new Blob([JSON.stringify({app:"xrpl-tax",version:2,wallets:XS.wallets,tokens:TOK,book:BOOK},null,2)],{type:"application/json"});
+  const blob=new Blob([JSON.stringify({app:"xrpl-tax",version:2,wallets:XS.wallets,tokens:TOK,book:BOOK,symbols:SYM},null,2)],{type:"application/json"});
   const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="xrpl-tax-wallets.json";a.click();
 }
 function importWallets(file){
@@ -1256,6 +1269,12 @@ function importWallets(file){
       XS.wallets=list;saveWallets();renderWallets();
       if(nt){Object.assign(TOK,j.tokens);store.set("xtax_tokens",TOK)}
       if(nb){Object.assign(BOOK,j.book);store.set("xtax_book",BOOK)}
+      // symbols from the file win (they were used in earlier CSVs); one given here that now clashes is given again on the next fetch
+      if(j.symbols&&typeof j.symbols==="object"){
+        const imp=Object.fromEntries(Object.entries(j.symbols).filter(([,s])=>typeof s==="string"&&s)),used=new Set(Object.values(imp));
+        for(const [k,s] of Object.entries(SYM))if(!(k in imp)&&used.has(s))delete SYM[k];
+        Object.assign(SYM,imp);store.set("xtax_symbols",SYM);
+      }
       if(XS.events){buildRows();render()}
     }catch{alert("読み込めませんでした（JSON形式ではありません）")}
   };
@@ -1281,7 +1300,7 @@ const walletName=w=>w?(w.label||short(w.address))+(w.tag?"（取引所）":""):"
 // All successful transactions touching the account, newest first → returned oldest first.
 // opts.ledgerMax continues below an earlier fetch; opts.stopAfter(t) ends paging early.
 async function fetchTxs(account,fromTs,toTs,onPage,opts={}){
-  const out=[];let marker,page=0,minLedger=Infinity,complete=false,stop=false;
+  const out=[],early=[],failed=[];let marker,page=0,minLedger=Infinity,complete=false,stop=false;
   while(true){
     checkCancel();
     const p={account,limit:400,forward:false,ledger_index_min:-1,ledger_index_max:opts.ledgerMax??-1,api_version:2};
@@ -1289,9 +1308,12 @@ async function fetchTxs(account,fromTs,toTs,onPage,opts={}){
     const r=await rpc("account_tx",p);
     for(const raw of r.transactions||[]){
       const t=normalize(raw);const ts=t.date+RIPPLE_EPOCH;
-      if(ts<fromTs){stop=true;break}
-      if(ts>=fromTs)minLedger=Math.min(minLedger,t.ledger);
-      if(ts>toTs||!t.meta||t.meta.TransactionResult!=="tesSUCCESS")continue;
+      if(ts<fromTs-(opts.lookback||0)){stop=true;break}
+      if(ts<fromTs){if(t.meta&&t.meta.TransactionResult==="tesSUCCESS")early.push(t);continue} // only for NFT mint payments
+      minLedger=Math.min(minLedger,t.ledger);
+      if(ts>toTs||!t.meta)continue;
+      // a failed transaction (tec…) moves nothing but still costs its sender the network fee
+      if(t.meta.TransactionResult!=="tesSUCCESS"){if(t.tx.Account===account)failed.push(t);continue}
       out.push(t);
       if(opts.stopAfter&&opts.stopAfter(t))stop=true;
     }
@@ -1300,7 +1322,7 @@ async function fetchTxs(account,fromTs,toTs,onPage,opts={}){
     if(stop)break;
     marker=r.marker;
   }
-  const res=out.reverse();res.minLedger=minLedger;res.complete=complete;
+  const res=out.reverse();res.minLedger=minLedger;res.complete=complete;res.early=early.reverse();res.failed=failed.reverse();
   return res;
 }
 // Economic balance changes of one account in one transaction (the account's own tx fee is added back).
@@ -1324,10 +1346,12 @@ function deltasOf(t,acct){
       const fin=Number((f.Balance||{}).value||0);
       let prev;
       if(kind==="CreatedNode")prev=0;else if(p.Balance)prev=Number(p.Balance.value);else continue;
-      const d=Number((sign*(fin-prev)).toPrecision(15));if(Math.abs(d)<1e-12)continue;
+      // Rounding inside the ledger leaves changes around 1e-13 of the balance: those are not movements.
+      // The cut is relative to the balance, never absolute: some tokens use units as small as 1e-81.
+      const d=Number((sign*(fin-prev)).toPrecision(15));if(!d||Math.abs(d)<=Math.max(Math.abs(fin),Math.abs(prev))*NOISE)continue;
       const raw=f.Balance.currency,issuer=low===acct?high:low;
       // AMM LP tokens use a currency code starting with 0x03
-      add(raw+"."+issuer,{raw,code:decodeCurrency(raw),issuer,lp:raw.length===40&&raw.startsWith("03"),prevBal:sign*prev},d);
+      add(raw+"."+issuer,{raw,code:decodeCurrency(raw),issuer,lp:raw.length===40&&raw.startsWith("03"),prevBal:sign*prev,bal:sign*fin},d);
     }
   }
   return[...out.values()];
@@ -1337,7 +1361,11 @@ function decStr(x,sig=15){
   if(x==null||!isFinite(x))return"";
   if(x===0)return"0";
   let s=Number(x).toPrecision(sig);
-  if(/e/.test(s))s=Number(s).toFixed(20);
+  const m=/^(-?)(\d)(?:\.(\d+))?e([+-]\d+)$/.exec(s);
+  if(m){ // write the exponent form out as plain digits
+    const digits=m[2]+(m[3]||""),e=+m[4];
+    s=m[1]+(e<0?"0."+"0".repeat(-e-1)+digits:digits.length>e+1?digits.slice(0,e+1)+"."+digits.slice(e+1):digits+"0".repeat(e+1-digits.length));
+  }
   if(s.includes("."))s=s.replace(/0+$/,"").replace(/\.$/,"");
   return s;
 }
@@ -1367,16 +1395,34 @@ function tokenInfo(d){
   if(d.raw==="XRP")return{key:"XRP",symbol:"XRP",supported:true,priced:true,xrp:true};
   const key=tokKey(d),saved=TOK[key]||{},known=KNOWN_TOKENS[d.issuer+"|"+d.code];
   const mode=saved.mode||(saved.supported?"priced":null)||(known&&known.mode)||"custom";
-  return{key,code:d.code,issuer:d.issuer,symbol:saved.symbol||(known&&known.symbol)||(XS.autoSym&&XS.autoSym.get(key))||defaultSymbol(d),
+  return{key,code:d.code,issuer:d.issuer,symbol:saved.symbol||(known&&known.symbol)||SYM[key]||defaultSymbol(d),
     mode,supported:mode!=="custom",priced:mode==="priced",checked:saved.mode?"user":known?"builtin":"",note:known&&known.note};
 }
-// Same code from different issuers gets the issuer appended so the coins stay apart
+// Custom coin symbols must stay the same across runs (monthly CSVs) and never be shared by two tokens:
+// a token keeps the symbol it got the first time (saved per currency+issuer). Same code from a different issuer gets the
+// issuer appended when the plain symbol is already taken, or when both first appear in the same fetch.
+const SYM=store.get("xtax_symbols",{});
 function assignAutoSymbols(tokens){
-  XS.autoSym=new Map();const bySym=new Map();
-  for(const d of tokens){const s=defaultSymbol(d);(bySym.get(s)||bySym.set(s,new Map()).get(s)).set(tokKey(d),d)}
-  for(const [s,m] of bySym)for(const [k,d] of m)XS.autoSym.set(k,m.size>1?(s+"#"+d.issuer.slice(1,5).toUpperCase()).slice(0,120):s);
+  const fresh=new Map(),taken=new Map(); // symbol → token key that owns it
+  for(const [k,s] of Object.entries(SYM))taken.set(s,k);
+  for(const [k,v] of Object.entries(KNOWN_TOKENS))taken.set(v.symbol,"known|"+k);
+  for(const [k,v] of Object.entries(TOK))if(v&&v.symbol)taken.set(v.symbol,k);
+  for(const d of tokens){
+    const k=tokKey(d);if(SYM[k]||fresh.has(k)||TOK[k]&&TOK[k].symbol||KNOWN_TOKENS[d.issuer+"|"+d.code])continue;
+    fresh.set(k,d);
+  }
+  const bySym=new Map();
+  for(const [k,d] of fresh){const s=defaultSymbol(d);(bySym.get(s)||bySym.set(s,new Map()).get(s)).set(k,d)}
+  for(const [s,m] of bySym)for(const [k,d] of m){
+    let sym=s;
+    if(m.size>1||(taken.has(s)&&taken.get(s)!==k))for(let n=4;n<=d.issuer.length;n++){sym=(s+"#"+d.issuer.slice(1,1+n).toUpperCase()).slice(0,120);if(!taken.has(sym))break}
+    SYM[k]=sym;taken.set(sym,k);
+  }
+  if(fresh.size)store.set("xtax_symbols",SYM);
 }
 const csvSym=i=>i.supported?i.symbol:"USER-"+i.symbol;
+// Every token an event touches (for symbols and the token list)
+const evTokens=e=>e.kind==="swap"?[e.send,e.recv]:e.kind==="amm"?e.assets:e.kind==="receipt"?[e.recv]:e.kind==="xout"?[e.send]:e.kind==="other"?e.deltas:[];
 // FAssets payment reference: "FBPRfA" + 2-byte type + 24-byte id (32 bytes), carried in the memo
 function payRef(tx){
   for(const m of tx.Memos||[]){
@@ -1420,8 +1466,11 @@ function phase2(t,w){
   const ds=deltasOf(t,w.address);
   const lp=ds.filter(d=>d.lp),assets=ds.filter(d=>!d.lp);
   const base={t,hash:t.hash,ts:t.date+RIPPLE_EPOCH,wallet:w,own:t.tx.Account===w.address};
-  if(lp.length===1)return{...base,kind:"amm",pool:lp[0].issuer,lpDelta:lp[0].delta,lpPrev:lp[0].prevBal,assets,label:lp[0].delta>0?"AMM預入":"AMM引出"};
-  const sends=assets.filter(d=>d.delta<-DUST),recv=assets.filter(d=>d.delta>DUST);
+  const type=t.tx.TransactionType;
+  if(lp.length===1&&/^AMM(Deposit|Withdraw|Create)$/.test(type))return{...base,kind:"amm",pool:lp[0].issuer,lpDelta:lp[0].delta,lpPrev:lp[0].prevBal,lpBal:lp[0].bal,assets,label:lp[0].delta>0?"AMM預入":"AMM引出"};
+  const sends=assets.filter(d=>d.delta<0),recv=assets.filter(d=>d.delta>0);
+  // LP tokens moved by something other than an AMM deposit/withdrawal (sent, traded, bid): not judged automatically
+  if(lp.length)return{...base,kind:"other",deltas:ds,lpMoved:true};
   if(sends.length===1&&recv.length===1)return{...base,kind:"swap",send:sends[0],recv:recv[0]};
   if(t.tx.TransactionType==="Payment"){
     const dep=base.own&&t.tx.Destination===DOPPLER.deposit&&sends.length===1&&!recv.length;
@@ -1439,13 +1488,18 @@ function phase2(t,w){
   // phase 4: plain payments with someone who is not a registered wallet
   if(t.tx.TransactionType==="Payment"){
     const memo=memoText(t.tx);
-    if(/NFT mint by xrp\.cafe/i.test(memo))return null; // paid NFT mints belong to the xrp.cafe tab
+    if(/NFT mint by xrp\.cafe/i.test(memo))return null; // paid NFT mints: part of the NFT rows (option / xrp.cafe tab)
     if(!sends.length&&recv.length===1&&recv[0].raw==="XRP"&&!base.own)return{...base,kind:"xin",recv:recv[0],from:senderOf(t),memo,srcTag:t.tx.SourceTag};
     if(sends.length===1&&!recv.length&&base.own&&sends[0].raw==="XRP"&&/service fee/i.test(memo))return{...base,kind:"svcfee",to:t.tx.Destination,memo,fee:+(-sends[0].delta+drops(t.tx.Fee)).toFixed(6)};
     if(sends.length===1&&!recv.length&&base.own)return{...base,kind:"xout",send:sends[0],to:t.tx.Destination,tag:t.tx.DestinationTag,memo};
   }
+  // Anything else that changed a balance (several assets at once, escrow, check, payment channel, …) is shown for review, never dropped.
+  // NFT transactions are read by readNfts (NFT option / xrp.cafe tab).
+  if(ds.length&&!/^NFToken/.test(type))return{...base,kind:"other",deltas:ds};
   return null;
 }
+// NFT transactions and xrp.cafe mint payments: the NFT rows' business (NFT option / xrp.cafe tab)
+const nftTx=t=>/^NFToken/.test(t.tx.TransactionType)||(t.tx.TransactionType==="Payment"&&MINT_PAY_MEMO.test(memoText(t.tx)));
 function memoText(tx){
   try{return(tx.Memos||[]).map(m=>hexToStr(m.Memo.MemoData||"")).join(" ").replace(/[^\x20-\x7e\u3000-\u9fff\uff00-\uffef]/g,"").trim().slice(0,80)}catch{return""}
 }
@@ -1596,13 +1650,13 @@ async function ammLookback(amm,walletTxs,fromTs){
   for(const {w,txs} of walletTxs){
     const first=new Map();
     for(const e of amm.filter(e=>e.wallet===w).sort((a,b)=>a.ts-b.ts))if(!first.has(e.pool))first.set(e.pool,e);
-    const need=new Set([...first].filter(([,e])=>!e.vault&&e.lpPrev>DUST).map(([p])=>p));
+    const need=new Set([...first].filter(([,e])=>!e.vault&&e.lpPrev>0).map(([p])=>p));
     const vaultAll=amm.some(e=>e.wallet===w&&e.vault&&e.assets[0].delta>0);
     if(!need.size&&!vaultAll)continue;
     if(vaultAll)XS.vaultFull.add(w.address);
     const older=await fetchTxs(w.address,0,fromTs-1,p=>xStatus(`${walletName(w)} のAMMの元本を確認するため、過去の履歴を読み込み中… ${p}ページ目`),{
       ledgerMax:isFinite(txs.minLedger)?txs.minLedger:undefined,
-      stopAfter:t=>{for(const d of deltasOf(t,w.address))if(d.lp&&need.has(d.issuer)&&d.prevBal<=DUST)need.delete(d.issuer);return need.size===0&&!vaultAll}});
+      stopAfter:t=>{for(const d of deltasOf(t,w.address))if(d.lp&&need.has(d.issuer)&&d.prevBal<=0)need.delete(d.issuer);return need.size===0&&!vaultAll}});
     for(const t of older){const e=phase2(t,w);if(e&&e.kind==="amm")amm.push(e)}
   }
 }
@@ -1614,19 +1668,23 @@ function runAmm(amm){
     const st=pos.get(key)||{pool:e.pool,vault:e.vault,wallet:e.wallet,lp:0,peak:0,principal:new Map(),deposited:new Map(),recovered:new Map(),
       bonus:new Map(),loss:new Map(),tokens:new Map(),events:0,first:e.ts,last:e.ts,closed:false};
     pos.set(key,st);st.events++;st.last=e.ts;
-    const rows=[];
+    const rows=[],dep=k=>(st.deposited.get(k)||{v:0}).v;
     for(const d of e.assets){
       st.tokens.set(tokKey(d),d);
       const k=tokKey(d),cur=st.principal.get(k)||{d,v:0};st.principal.set(k,cur);
       if(d.delta<0){cur.v+=-d.delta;addTo(st.deposited,d,-d.delta);rows.push({action:"LEND",tok:d,vol:-d.delta});continue}
-      const part=Math.min(d.delta,cur.v),excess=d.delta-part;cur.v-=part;
-      if(part>DUST){addTo(st.recovered,d,part);rows.push({action:"RECOVER",tok:d,vol:part})}
-      if(excess>DUST){addTo(st.bonus,d,excess);rows.push({action:"BONUS",tok:d,vol:excess})}
+      // amounts are compared relative to their own size (never to a fixed number): float noise only
+      let part=Math.min(d.delta,cur.v),excess=d.delta-part;
+      if(part<=d.delta*NOISE){part=0;excess=d.delta}else if(excess<=d.delta*NOISE){excess=0;part=d.delta}
+      cur.v-=part;if(cur.v<=dep(k)*NOISE)cur.v=0;
+      if(part>0){addTo(st.recovered,d,part);rows.push({action:"RECOVER",tok:d,vol:part})}
+      if(excess>0){addTo(st.bonus,d,excess);rows.push({action:"BONUS",tok:d,vol:excess})}
     }
     if(e.lpDelta>0)st.closed=false;
-    st.lp+=e.lpDelta;st.peak=Math.max(st.peak,st.lp);
-    if(e.lpDelta<0&&st.lp<=Math.max(DUST,st.peak*1e-9)){
-      for(const c of st.principal.values())if(c.v>DUST){addTo(st.loss,c.d,c.v);rows.push({action:"LOSS",tok:c.d,vol:c.v});c.v=0}
+    // the LP balance comes from the ledger itself (accumulating our own sums could drift)
+    st.lp=e.lpBal!=null?e.lpBal:st.lp+e.lpDelta;st.peak=Math.max(st.peak,st.lp,e.lpPrev||0);
+    if(e.lpDelta<0&&st.lp<=st.peak*1e-9){
+      for(const c of st.principal.values())if(c.v>0){addTo(st.loss,c.d,c.v);rows.push({action:"LOSS",tok:c.d,vol:c.v});c.v=0}
       st.lp=0;st.peak=0;st.closed=true;e.closed=true;
     }
     e.ammRows=rows;
@@ -1713,7 +1771,7 @@ async function valueEvent(ev){
     const val={},bs=[];
     for(const d of toks){
       let p=null;
-      if(x&&Math.sign(x.delta)===Math.sign(d.delta)&&Math.abs(d.delta)>DUST){p=Math.abs(x.delta)/Math.abs(d.delta);bs.push(`払い戻し比率 ${decStr(p,6)} XRP/${tokenInfo(d).symbol}`)}
+      if(x&&Math.sign(x.delta)===Math.sign(d.delta)){p=Math.abs(x.delta)/Math.abs(d.delta);bs.push(`払い戻し比率 ${decStr(p,6)} XRP/${tokenInfo(d).symbol}`)}
       else{const a=await ammPrice(d,ev.t.ledger);if(a){p=a.xrp;bs.push(`AMM@${ev.t.ledger-1} ${decStr(p,6)} XRP/${tokenInfo(d).symbol}`)}}
       if(p!=null)val[tokKey(d)]=p*j.jpy;
     }
@@ -1782,12 +1840,12 @@ async function run(){
   if(!(fromTs<=toTs))return xWarn("期間を確認してください");
   store.set("xtax_period",{from:$("xFrom").value,to:$("xTo").value});
   const range={start:$("xFrom").value,end:$("xTo").value}; // the CSV file name uses the period of this fetch, not the inputs at download time
-  xWarn("");setBusy(true);
+  xWarn("");setBusy(true);$("xCheck").hidden=true;
   rpc.onWait=ms=>xStatus(`公開ノードの回数制限のため ${Math.ceil(ms/1000)}秒待機中…（自動で再開します）`);
   try{
     const walletTxs=[],byHash=new Map();
     for(const [i,w] of readable.entries()){
-      const txs=await fetchTxs(w.address,fromTs,toTs,(p,n)=>xStatus(`${walletName(w)}（${i+1}/${readable.length}）を読み込み中… ${p}ページ目 / ${n}件`));
+      const txs=await fetchTxs(w.address,fromTs,toTs,(p,n)=>xStatus(`${walletName(w)}（${i+1}/${readable.length}）を読み込み中… ${p}ページ目 / ${n}件`),{lookback:XS.nft?MINT_PAY_LOOKBACK:0});
       walletTxs.push({w,txs});
       for(const t of txs)if(!byHash.has(t.hash))byHash.set(t.hash,t); // a transfer between two wallets shows up in both
     }
@@ -1802,9 +1860,12 @@ async function run(){
       const e=phase2(t,w);
       if(e){(e.kind==="amm"?amm:events).push(e);continue}
       // our own transaction that moved nothing (trust line, offer placed/cancelled, settings): network fee only
-      // (NFT transactions belong to the xrp.cafe tab)
-      if(t.tx.Account===w.address&&!/^NFToken/.test(t.tx.TransactionType)&&!deltasOf(t,w.address).length)feeOnly.push({t,w});
+      // (NFT transactions and xrp.cafe mint payments are read by readNfts when the NFT option is on; their fees are in those rows)
+      if(t.tx.Account===w.address&&!nftTx(t))feeOnly.push({t,w});
     }
+    // failed transactions of our own: nothing moved, the fee was still paid (NFT ones are shown only together with the NFT rows)
+    for(const {w,txs} of walletTxs)for(const t of txs.failed||[])feeOnly.push({t,w,failed:true});
+    const nftEvents=XS.nft?await readNfts(walletTxs,fromTs):null;
     await ammLookback(amm,walletTxs,fromTs);
     runAmm(amm,fromTs);
     events.push(...amm.filter(e=>e.ts>=fromTs));
@@ -1815,22 +1876,104 @@ async function run(){
       try{await resolveFlare(ev)}catch(e){if(e.message===CANCELLED)throw e;ev.error=e.message}
     }
     events.forEach(build);
-    const toks0=[];for(const e of events){if(e.kind==="swap")toks0.push(e.send,e.recv);if(e.kind==="amm")toks0.push(...e.assets);if(e.kind==="receipt")toks0.push(e.recv);if(e.kind==="xout")toks0.push(e.send)}
-    assignAutoSymbols(toks0.filter(d=>d.raw!=="XRP"));
+    assignAutoSymbols(events.flatMap(evTokens).filter(d=>d.raw!=="XRP"));
     const toValue=events.filter(e=>(e.kind==="swap"&&e.send.raw!=="XRP"&&e.recv.raw!=="XRP")||(e.kind==="amm"&&e.assets.some(d=>d.raw!=="XRP"))||e.kind==="receipt"||(e.kind==="xout"&&e.send.raw!=="XRP"&&!tokenInfo(e.send).priced));
     let next=0,doneN=0;
     const worker=async()=>{while(next<toValue.length){const ev=toValue[next++];await valueEvent(ev);xStatus(`円換算の価格を調べています… ${++doneN}/${toValue.length}`)}};
     await Promise.all([worker(),worker(),worker(),worker()]);
-    const toks=[];
-    for(const e of events){if(e.kind==="swap")toks.push(e.send,e.recv);if(e.kind==="amm")toks.push(...e.assets);if(e.kind==="receipt")toks.push(e.recv);if(e.kind==="xout")toks.push(e.send)}
-    assignAutoSymbols(toks.filter(d=>d.raw!=="XRP"));
-    XS.events=events;XS.feeOnly=feeOnly;XS.range=range; // only once the fetch finished, so a stopped fetch keeps the old rows' name
+    XS.events=events;XS.feeOnly=feeOnly;XS.nftEvents=nftEvents;XS.range=range; // only once the fetch finished, so a stopped fetch keeps the old rows' name
     buildRows();
     render();
+    const chk=await checkBalances(walletTxs);
+    $("xCheck").textContent=chk;$("xCheck").hidden=!chk;$("xCheck").classList.toggle("ok",chk.startsWith("✓"));
     const miss=fx.filter(e=>!e.resolved).length;
     xWarn(miss?`⚠ Flare側の記録が見つからなかったFXRPの取引が ${miss}件あります（推定値のため「要確認」にしています）`:"");
   }catch(e){xWarn(e.message===CANCELLED?"停止しました。期間やウォレットを直して、もう一度取得してください。":"エラー: "+e.message)}
   finally{setBusy(false)}
+}
+
+// ---------- completeness check: balances before / after the period vs the changes of the transactions read ----------
+// Real balance changes of one account in one transaction (fee included, no noise cut; XRP in drops)
+function balChanges(t,acct){
+  const out=new Map(),add=(k,v)=>out.set(k,(out.get(k)||0)+v);
+  for(const n of t.meta.AffectedNodes||[]){
+    const kind=Object.keys(n)[0],v=n[kind],f=v.FinalFields||v.NewFields||{},p=v.PreviousFields||{};
+    if(v.LedgerEntryType==="AccountRoot"&&f.Account===acct){
+      if(kind==="CreatedNode")add("XRP",Number(f.Balance));else if(p.Balance!=null)add("XRP",Number(f.Balance)-Number(p.Balance));
+    }else if(v.LedgerEntryType==="RippleState"){
+      const low=f.LowLimit&&f.LowLimit.issuer,high=f.HighLimit&&f.HighLimit.issuer;
+      if(low!==acct&&high!==acct)continue;
+      const prev=kind==="CreatedNode"?0:p.Balance?Number(p.Balance.value):null;if(prev==null)continue;
+      add(f.Balance.currency+"."+(low===acct?high:low),(low===acct?1:-1)*(Number(f.Balance.value)-prev));
+    }
+  }
+  return out;
+}
+// XRP (drops) and trust line balances of an account at a ledger; an account that did not exist yet is empty
+async function balancesAt(acct,ledger){
+  const out=new Map();
+  try{const r=await rpc("account_info",{account:acct,ledger_index:ledger});out.set("XRP",Number(r.account_data.Balance))}
+  catch(e){if(e.message!==CANCELLED&&(e.code==="actNotFound"||/actNotFound|account not found/i.test(e.message)))return out;throw e}
+  let marker;
+  do{
+    checkCancel();
+    const p={account:acct,ledger_index:ledger,limit:400};if(marker)p.marker=marker;
+    const r=await rpc("account_lines",p);
+    for(const l of r.lines||[])out.set(l.currency+"."+l.account,Number(l.balance));
+    marker=r.marker;
+  }while(marker);
+  return out;
+}
+// For each wallet: balance before its first tx in the period + all changes read = balance after its last one.
+// A difference means a transaction is missing from what the node returned. Never fails the fetch.
+async function checkBalances(walletTxs){
+  const bad=[];let n=0;
+  try{
+    for(const {w,txs} of walletTxs){
+      const list=[...txs,...txs.failed||[]];if(!list.length)continue;
+      let lo=Infinity,hi=0;const sum=new Map(),mag=new Map();
+      for(const t of list){
+        lo=Math.min(lo,t.ledger);hi=Math.max(hi,t.ledger);
+        for(const [k,v] of balChanges(t,w.address)){sum.set(k,(sum.get(k)||0)+v);mag.set(k,(mag.get(k)||0)+Math.abs(v))}
+      }
+      xStatus(`残高を検算しています… ${walletName(w)}`);
+      const a=await balancesAt(w.address,lo-1),b=await balancesAt(w.address,hi);
+      for(const k of new Set([...a.keys(),...b.keys(),...sum.keys()])){
+        const x=(a.get(k)||0)+(sum.get(k)||0),y=b.get(k)||0;
+        const ok=k==="XRP"?Math.abs(x-y)<1:Math.abs(x-y)<=Math.max(Math.abs(x),Math.abs(y),Math.abs(a.get(k)||0)+(mag.get(k)||0))*1e-9;
+        if(!ok)bad.push({w,k,d:k==="XRP"?(y-x)/1e6:y-x});
+      }
+      n++;
+    }
+  }catch(e){return e.message===CANCELLED?"ℹ️ 残高の検算は停止しました":"ℹ️ 残高の検算はできませんでした（ノードが過去の残高を返しませんでした）"}
+  if(!n)return"";
+  if(!bad.length)return`✓ 残高の検算: 期間の前後の残高と、読み込んだ取引の増減が一致しました（${n}ウォレット）`;
+  const m=bad[0],[raw,issuer]=m.k.split("."),sym=m.k==="XRP"?"XRP":tokenInfo({raw,code:decodeCurrency(raw),issuer}).symbol;
+  return`ℹ️ 残高の検算: ${walletName(m.w)} の ${sym} が ${decStr(Math.abs(m.d),8)} ずれています${bad.length>1?`（ほか${bad.length-1}件）`:""}。取引の読み込みに漏れがあるかもしれません。もう一度取得してください`;
+}
+
+// ---------- NFT trades (option): the xrp.cafe tab's rules (analyze in the shared core), wallet by wallet ----------
+const NFT_ACTION={buy:"BUY",sell:"SELL",mint:"BUY",paidmint:"BUY",receive:"BONUS"};
+const NFT_LABEL={buy:"購入",sell:"売却",mint:"ミント",paidmint:"有料ミント",receive:"無償受取"};
+// the other things analyze() finds: loose network fees, burns, NFTs given away for 0, royalty income (as the issuer)
+const NFT_SIDE=new Set(["fee","burn","send","royalty"]);
+async function readNfts(walletTxs,fromTs){
+  const out=[],uris={};
+  for(const {w,txs} of walletTxs){
+    const nt=[...txs.early||[],...txs].filter(t=>isMintPayment(t,w.address)||(t.date+RIPPLE_EPOCH>=fromTs&&NFT_TYPES.has(t.tx.TransactionType)));
+    if(!nt.length)continue;
+    xStatus(`${walletName(w)} のNFT取引を解析中…`);
+    const res=await analyze(w.address,nt,{linkOfferFees:true});
+    Object.assign(uris,res.uris);
+    for(const r of res.rows)if((NFT_ACTION[r.kind]||NFT_SIDE.has(r.kind))&&r.ts>=fromTs)out.push({kind:"nft",ts:r.ts,hash:r.hash,wallet:w,nft:r});
+  }
+  // NFT names make the custom coin symbols; shared with the xrp.cafe tab and its saved cache
+  const ids=[...new Set(out.map(e=>e.nft.nft).filter(id=>id&&!(id in state.names)))];
+  let i=0;
+  const worker=async()=>{while(i<ids.length){checkCancel();const id=ids[i++];state.names[id]=await fetchName(uris[id]);xStatus(`NFT名を取得中… ${i}/${ids.length}`)}};
+  await Promise.all([worker(),worker(),worker(),worker()]);
+  try{localStorage.setItem("nftx_names",JSON.stringify(Object.fromEntries(Object.entries(state.names).filter(([,v])=>v))))}catch{}
+  return out;
 }
 
 // ---------- rows (one row = one Cryptact entry, like the Flare tool) ----------
@@ -1870,13 +2013,29 @@ function cpHtml(addr){
   const name=w?`<strong>${esc(walletName(w))}（登録ウォレット）</strong>`:e?`<strong>${esc(e.label)}${e.self?"（自分）":""}</strong>`:"";
   return`相手: <span class="xmono">${short(addr)}</span> ${name}${w?"":` <a href="#" class="xreg" data-reg="${addr}">${e?"編集":"登録"}</a>`}`;
 }
-const TX_JA={TrustSet:"トラストライン設定",OfferCreate:"DEXの注文",OfferCancel:"注文の取消",AccountSet:"アカウント設定",SetRegularKey:"キー設定",SignerListSet:"マルチシグ設定",AccountDelete:"アカウント削除",AMMVote:"AMMの手数料投票",AMMBid:"AMMの入札",TicketCreate:"チケット作成",DepositPreauth:"入金許可設定",Payment:"送金"};
+const TX_JA={TrustSet:"トラストライン設定",OfferCreate:"DEXの注文",OfferCancel:"注文の取消",AccountSet:"アカウント設定",SetRegularKey:"キー設定",SignerListSet:"マルチシグ設定",AccountDelete:"アカウント削除",AMMVote:"AMMの手数料投票",AMMBid:"AMMの入札",TicketCreate:"チケット作成",DepositPreauth:"入金許可設定",Payment:"送金",
+  AMMDeposit:"AMMの預け入れ",AMMWithdraw:"AMMの引き出し",AMMCreate:"AMMの作成",CheckCreate:"チェック作成",CheckCash:"チェックの換金",CheckCancel:"チェック取消",
+  EscrowCreate:"エスクロー作成",EscrowFinish:"エスクロー完了",EscrowCancel:"エスクロー取消",PaymentChannelCreate:"ペイメントチャネル作成",PaymentChannelFund:"ペイメントチャネル入金",
+  PaymentChannelClaim:"ペイメントチャネル請求",Clawback:"発行者による回収",Batch:"一括送信（Batch）",
+  NFTokenMint:"NFTのミント",NFTokenBurn:"NFTのバーン",NFTokenCreateOffer:"NFTのオファー作成",NFTokenCancelOffer:"NFTのオファー取消",NFTokenAcceptOffer:"NFTのオファー承認",NFTokenModify:"NFTの更新"};
+const txJa=t=>TX_JA[t.tx.TransactionType]||t.tx.TransactionType;
+// Cryptact cannot take numbers with dozens of digits (tokens with absurdly small or large units, e.g. 1e-81).
+// Prices of cheap tokens (about 20 decimals) were always exported and stay so.
+const tooLong=v=>{const [i,f=""]=String(v??"").replace("-","").split(".");return i.length>18||f.length>30};
 function buildRows(){
   const rows=[];
   // a sender that paid the same token 3+ times is a distributor (rewards / airdrops)
   const freq=new Map();
   for(const ev of XS.events)if(ev.kind==="receipt"){const k=ev.from+"|"+tokKey(ev.recv);freq.set(k,(freq.get(k)||0)+1)}
-  const push=(ev,o)=>rows.push({ts:ev.ts,hash:ev.hash,wallet:ev.wallet,price:"",fee:"0",feeCcy:"JPY",info:"",flareTx:ev.flareTx,net:ev.net,ref:refOf(ev,o.basis),...o});
+  const push=(ev,o)=>{
+    const r={ts:ev.ts,hash:ev.hash,wallet:ev.wallet,price:"",fee:"0",feeCcy:"JPY",info:"",flareTx:ev.flareTx,net:ev.net,ref:refOf(ev,o.basis),...o};
+    if((tooLong(r.volume)||tooLong(r.price))&&r.status==="export"){r.status="review";r.warn="数量か価格の桁数が多すぎます（単位が極端に小さい／大きいトークン）。クリプタクトに入力できるか確認してください"}
+    rows.push(r);
+  };
+  // the network fee of one of our own transactions, when no other row carries it (always shown, skipped by default)
+  const feeLine=(ts,hash,w,fee,comment,info,o)=>rows.push({ts,hash,wallet:w,action:"DEFIFEE",source:"XRPL",base:FIXED("XRP"),volume:"0",price:"",counter:JPY,
+    fee:fmt(fee),feeCcy:"XRP",comment,ref:`xrpl:${hash.slice(0,12)}`,status:"skip",info:info||"手数料だけの取引（ネットワーク手数料）",...o});
+  const feeRow=(t,w,what,info)=>feeLine(t.date+RIPPLE_EPOCH,t.hash,w,drops(t.tx.Fee),`[手数料のみ] ${what||txJa(t)}`,info);
   for(const ev of XS.events){
     if(FXRP_KINDS.includes(ev.kind)){
       const r=ev.rebrand,ok=r.volume!=null&&ev.fee!=null,st=ok&&!ev.estimated?"export":"review",info=fxrpInfo(ev);
@@ -1913,6 +2072,16 @@ function buildRows(){
         counter:JPY,fee:out?fmt(drops(ev.t.tx.Fee)):"0",feeCcy:out?"XRP":"JPY",
         comment:self?`[送金] 自分の口座${out?"へ":"から"}`:out?`[送金] ${b.symbol}を送金`:`[受取] ${b.symbol}を受け取り`,status:self?"skip":"review",self,
         info:[cpHtml(cp),...hints].join(" ・ "),warn});
+    }else if(ev.kind==="other"){
+      // not judged automatically: one row per balance change, for the user to decide
+      for(const d of ev.deltas){
+        const b=tokenInfo(d),out=d.delta<0,vol=Math.abs(d.delta);
+        push(ev,{action:out?"SELL":"BUY",source:"XRPL",base:b,volume:b.xrp?fmt(vol):decStr(vol,14),needPrice:!b.priced,counter:JPY,
+          comment:`[要確認] ${d.lp?"LPトークン":b.symbol}が${out?"減った":"増えた"}（${txJa(ev.t)}）`,status:"review",info:ev.own?"":"他の人の取引で残高が動いた",
+          warn:ev.lpMoved?"LPトークンがAMMの預け入れ・引き出し以外で動きました。AMMの元本は自動では引き継がれません。内容を確認してください"
+            :"自動で判定できない取引です。内容を確認してActionを選んでください（元本の戻り・自分の資産の移動なら出力しない）"});
+      }
+      if(ev.own)feeRow(ev.t,ev.wallet,"",`${txJa(ev.t)}のネットワーク手数料`);
     }else if(ev.kind==="transfer"){
       push(ev,{action:"SENDFEE",source:"XRPL",base:FIXED(ev.ccy),volume:decStr(ev.amount),counter:JPY,fee:fmt(ev.fee),feeCcy:"XRP",
         comment:`[ウォレット間] ${walletName(ev.from)} → ${walletName(ev.to)}`,status:"skip",self:true,from:ev.from,to:ev.to,info:"自分の口座間の移動（入力不要）"});
@@ -1938,21 +2107,55 @@ function buildRows(){
         push(ev,{action:self?"SENDFEE":"BONUS",source:"XRPL",base:r.base,volume:volStr(r),price:r.price===null||r.price===""?"":decStr(r.price,10),needPrice:r.price===null&&!self&&st!=="scam",auto:r.auto,
           counter:JPY,fee:"0",feeCcy:"JPY",comment:tag==="[SCAM]"?"[SCAM] スキャムアカウントからの送金":`${tag} ${r.base.symbol}${tag==="[配布]"?"（報酬・エアドロ）":""}`,basis,status:st,self,
           info:scam?cpHtml(ev.from):[cpHtml(ev.from),why,ev.memo?`メモ「${esc(ev.memo)}」`:""].filter(Boolean).join(" ・ "),warn});
+        if(ev.own)feeRow(ev.t,ev.wallet,"",`${txJa(ev.t)}のネットワーク手数料`); // a BONUS row cannot carry an XRP fee
         continue;
       }
+      // AMM / vault rows carry no fee of their own: our network fee goes on the first LEND / RECOVER row, or on a row of its own
+      let ammFee=ev.kind==="amm"&&ev.own?drops(ev.t.tx.Fee):0;
       for(const r of eventRows(ev)){
         const needPrice=r.price===null;
         const st=r.action==="LEND"||r.action==="RECOVER"?"skip":needPrice?"review":"export";
         const basis=r.auto&&ev.val?ev.val.basis:"";
+        const carry=ammFee>0&&st==="skip";
         push(ev,{action:r.action,source:src,base:r.base,volume:volStr(r),price:needPrice||r.price===""?"":decStr(r.price,10),needPrice,auto:r.auto,
-          counter:r.counter,fee:fmt(r.fee),feeCcy:r.feeCcy,comment:rowComment(ev,r.action),basis,status:st,
+          counter:r.counter,fee:fmt(carry?ammFee:r.fee),feeCcy:carry?"XRP":r.feeCcy,comment:rowComment(ev,r.action),basis,status:st,
           info,warn:needPrice?"価格（円）を入力してください（自動で出せませんでした）":""});
+        if(carry)ammFee=0;
       }
+      if(ammFee>0)feeRow(ev.t,ev.wallet,"",`${txJa(ev.t)}のネットワーク手数料`);
     }
   }
-  for(const {t,w} of XS.feeOnly||[]){
-    rows.push({ts:t.date+RIPPLE_EPOCH,hash:t.hash,wallet:w,action:"DEFIFEE",source:"XRPL",base:FIXED("XRP"),volume:"0",price:"",counter:JPY,
-      fee:fmt(drops(t.tx.Fee)),feeCcy:"XRP",comment:`[手数料のみ] ${TX_JA[t.tx.TransactionType]||t.tx.TransactionType}`,ref:`xrpl:${t.hash.slice(0,12)}`,status:"skip",info:"手数料だけの取引（ネットワーク手数料）"});
+  for(const ev of XS.nft&&XS.nftEvents||[]){
+    const n=ev.nft,bonus=n.kind==="receive",xrp=n.ccy==="XRP",sym=coinSymbol(n);
+    // moved between my own wallets → not a trade; already entered from the xrp.cafe tab (入力済) → not exported again
+    const own=!!n.counterparty&&(XS.wallets.some(w=>w.address===n.counterparty)||!!(BOOK[n.counterparty]&&BOOK[n.counterparty].self));
+    if(n.kind==="fee"){feeLine(n.ts,n.hash,ev.wallet,n.fee,`[手数料のみ] NFT: ${n.why}`,"NFTの取引のネットワーク手数料");continue}
+    if(n.kind==="burn"||n.kind==="send"){
+      // the NFT left the wallet without a price: only the network fee is recorded here
+      const what=n.kind==="burn"?"バーン":own?"ウォレット間の移動":"無償で送付";
+      feeLine(n.ts,n.hash,ev.wallet,n.fee,`[NFT] ${what} ${sym}`,[n.counterparty?cpHtml(n.counterparty):"",own?"自分の口座間の移動（入力不要）":
+        "NFTが手元からなくなりました。取得原価のあるNFTなら、在庫の減少（REDUCE など）を手で入力してください"].filter(Boolean).join(" ・ "),{self:own,source:n.cafe?"xrp.cafe":"XRPL NFT"});
+      continue;
+    }
+    if(n.kind==="royalty"){
+      // XRP income as the NFT's issuer (a sale between other people); the price is Cryptact's XRP rate
+      push(ev,{action:"BONUS",source:n.cafe?"xrp.cafe":"XRPL NFT",base:FIXED("XRP"),volume:fmt(n.price),counter:JPY,comment:`[NFT] ロイヤリティ受取 ${sym}`,
+        ref:`nft:${n.nft} / xrpl:${n.hash.slice(0,12)}`,status:"review",info:"発行したNFTが他の人の間で売れたときのロイヤリティ（XRPの収入）",warn:"収入として計上するか確認してください"});
+      if(n.fee>0)feeLine(n.ts,n.hash,ev.wallet,n.fee,`[手数料のみ] NFT: ロイヤリティの取引`,"");
+      continue;
+    }
+    const done=state.done.has(n.hash+n.kind);
+    const parts=!bonus&&n.feeParts&&n.feeParts.length?"手数料内訳: "+n.feeParts.map(([a,b])=>`${a} ${fmt(b)}`).join(" + "):"";
+    push(ev,{action:NFT_ACTION[n.kind],source:n.cafe?"xrp.cafe":"XRPL NFT",base:{symbol:sym,supported:false},volume:"1",price:bonus?"0":fmt(n.price),
+      counter:bonus?JPY:xrp?FIXED("XRP"):{symbol:n.ccy,supported:true},fee:bonus?"0":fmt(n.fee),feeCcy:bonus?"JPY":n.feeCcy||"XRP",
+      comment:own?`[NFT] ウォレット間の移動 ${sym}`:`[NFT] ${NFT_LABEL[n.kind]} ${sym}`,ref:`nft:${n.nft} / xrpl:${n.hash.slice(0,12)}`,
+      status:own||done?"skip":xrp||bonus?"export":"review",badge:done?"入力済":"",self:own,
+      info:[n.counterparty?cpHtml(n.counterparty):"",n.mintNote?esc(n.mintNote):"",parts].filter(Boolean).join(" ・ "),
+      warn:!xrp&&!bonus?`${n.ccy}建ての取引です。クリプタクトの決済通貨（Counter）にできるか確認してください`:n.mixedFee?"XRPのネットワーク手数料が同じ通貨として合算されています。分けて入力してください":""});
+  }
+  for(const {t,w,failed} of XS.feeOnly||[]){
+    if(failed&&!XS.nft&&/^NFToken/.test(t.tx.TransactionType))continue;
+    feeRow(t,w,failed?`失敗した取引（${txJa(t)}）`:"",failed?`失敗した取引でもかかるネットワーク手数料（${esc(t.meta.TransactionResult)}）`:"");
   }
   rows.sort((a,b)=>a.ts-b.ts);
   rows.forEach(r=>r.checked=r.status==="export");
@@ -2034,8 +2237,7 @@ function render(){
 function renderTokens(){
   const seen=new Map();
   for(const e of XS.events||[]){
-    const ds=e.kind==="swap"?[e.send,e.recv]:e.kind==="amm"?e.assets:e.kind==="receipt"?[e.recv]:e.kind==="xout"&&e.send.raw!=="XRP"?[e.send]:[];
-    for(const d of ds)if(d.raw!=="XRP"){const k=tokKey(d);const s=seen.get(k)||{d,n:0};s.n++;seen.set(k,s)}
+    for(const d of evTokens(e))if(d.raw!=="XRP"){const k=tokKey(d);const s=seen.get(k)||{d,n:0};s.n++;seen.set(k,s)}
   }
   $("xTokCount").textContent=` — ${seen.size}種`;
   $("xTokens").innerHTML=[...seen.values()].sort((a,b)=>b.n-a.n).map(({d,n})=>{
@@ -2067,7 +2269,7 @@ function renderLedger(){
   const open=list.filter(p=>!p.closed).length;
   $("xLpCount").textContent=`— 運用中 ${open} / 清算済み ${list.length-open}`;
   const showClosed=$("xShowClosed").checked;
-  const amounts=m=>{const a=[...m].filter(([,v])=>v.v>DUST).map(([,v])=>`${v.d.raw==="XRP"?fmt(v.v):decStr(v.v,10)} ${esc(tokenInfo(v.d).symbol)}`);return a.length?a.join("<br>"):"-"};
+  const amounts=m=>{const a=[...m].filter(([,v])=>v.v>0).map(([,v])=>`${v.d.raw==="XRP"?fmt(v.v):decStr(v.v,10)} ${esc(tokenInfo(v.d).symbol)}`);return a.length?a.join("<br>"):"-"};
   $("xLpBody").innerHTML=list.filter(p=>showClosed||!p.closed).map(p=>`<tr>
     <td>${p.closed?'<span class="sbadge s-skip">清算済み</span>':'<span class="sbadge s-review">運用中</span>'}</td>
     <td>${p.vault?`${esc(p.vault)} ${esc(p.pair)} Vault`:esc(p.pair)}<br><span class="xmuted xsmall">${p.vault?(XS.vaultFull&&XS.vaultFull.has(p.wallet.address)?"全期間の入金から計算":"※期間内の入金のみ（出金があれば過去分もさかのぼります）"):short(p.pool)} ・ ${esc(walletName(p.wallet))}</span></td>
@@ -2113,6 +2315,13 @@ function fileRange(rows){
 loadWallets();renderWallets();fillCafePick();
 XS.fxrpMode=store.get("xtax_fxrp_mode","same");
 $("xFxrpMode").value=XS.fxrpMode;
+XS.nft=!!store.get("xtax_nft",false);$("xNft").checked=XS.nft;
+$("xNft").onchange=e=>{
+  XS.nft=e.target.checked;store.set("xtax_nft",XS.nft);
+  if(!XS.events)return;
+  xWarn(XS.nft&&!XS.nftEvents?"NFTの取引を入れるには、もう一度「取引を取得する」を押してください":"");
+  buildRows();render();
+};
 $("xFxrpMode").onchange=e=>{XS.fxrpMode=e.target.value;store.set("xtax_fxrp_mode",XS.fxrpMode);if(XS.events){buildRows();render()}};
 const per=store.get("xtax_period",null);
 // Empty period → this month (1st to last day), like the Flare tool; a saved period is kept
