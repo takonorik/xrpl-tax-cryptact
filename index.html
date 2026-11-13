@@ -244,7 +244,10 @@ code{font:700 .72rem var(--mono);background:var(--brand-soft);color:var(--text);
 .seg-btn.on .seg-n{background:rgba(255,255,255,.25);color:#fff}
 .xtable-wrap{overflow:auto;border:2px solid var(--line);border-radius:18px;max-height:72vh}
 .xselcount{font-size:.74rem;font-weight:800;color:var(--muted);white-space:nowrap}
-.xopts{display:flex;justify-content:flex-end;margin:-4px 0 12px}
+.xopts{display:flex;justify-content:flex-end;align-items:center;flex-wrap:wrap;gap:6px 10px;margin:-4px 0 12px}
+.xfnote{font-size:.72rem;font-weight:600;color:var(--muted);line-height:1.5}
+.xfclear{margin-left:8px;border:1.5px solid var(--brand);background:transparent;color:var(--brand);border-radius:99px;padding:1px 10px;font:800 .7rem var(--sans);cursor:pointer}
+.xfclear:hover{background:var(--brand-tint)}
 /* PC幅: 取引履歴の中にいる間だけ、操作バーと表の見出しをヘッダー直下に固定する（スクロールはページ全体の1つにする） */
 .x-bar-sticky .xtoolbar{position:sticky;top:var(--appbar-h,58px);z-index:5;background:var(--surface);margin:-10px 0 2px;padding:10px 0}
 .x-sticky .xtable-wrap{max-height:none;overflow:clip}
@@ -254,15 +257,20 @@ code{font:700 .72rem var(--mono);background:var(--brand-soft);color:var(--text);
 .xp thead th{position:sticky;top:0;z-index:1;background:var(--brand-tint);color:var(--muted);font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;text-align:left;padding:10px 9px;border-bottom:2px solid var(--line);white-space:nowrap}
 .xp tbody td{padding:8px 9px;border-bottom:1.5px solid var(--brand-soft);white-space:nowrap;font-variant-numeric:tabular-nums;vertical-align:middle}
 .xp tbody tr:last-child td{border-bottom:0}
+@media(max-width:1180px){.xp thead th,.xp tbody td{padding-left:7px;padding-right:7px}} /* keeps the long-name (NFT) table inside the card at 1024px */
 .xp tbody tr:hover{background:var(--brand-tint)}
 .xp tr.row-review td:first-child{box-shadow:inset 4px 0 0 var(--brand)}
 .xp tr.row-skip td{color:var(--muted)}
-.sbadge{display:inline-block;padding:3px 8px;border-radius:99px;font-size:.64rem;font-weight:900;letter-spacing:.04em;border:1.5px solid transparent;white-space:nowrap}
+.sbadge{display:inline-block;box-sizing:border-box;min-width:72px;text-align:center;padding:3px 8px;border-radius:99px;font-size:.64rem;font-weight:900;letter-spacing:.04em;border:1.5px solid transparent;white-space:nowrap}
 .s-export{background:color-mix(in srgb,var(--buy) 14%,transparent);color:var(--buy);border-color:var(--buy)}
 .s-review{background:var(--brand);color:#fff}
 .s-skip{background:transparent;color:var(--muted);border:1.5px dashed var(--muted)}
 .s-scam{background:var(--sell);color:#fff}
+/* SCAM: dimmed just enough to ignore (no strike-through); the badge cell stays readable */
 .xp tr.row-scam td{color:var(--muted)}
+.xp tr.row-scam td:not(:nth-child(2)){opacity:.45}
+.xp tr.row-scam .xtxl{color:var(--muted)}
+.xp tbody tr.row-scam:hover{background:none}
 .xchk{width:16px;height:16px;accent-color:var(--brand);cursor:pointer}
 #xWalletFilter{max-width:none}
 .xact{max-width:178px;background:var(--field);color:var(--text);border:2px solid transparent;padding:5px 8px;border-radius:10px;font:800 .74rem var(--sans);cursor:pointer;outline:none}
@@ -272,24 +280,28 @@ code{font:700 .72rem var(--mono);background:var(--brand-soft);color:var(--text);
 .xpill{font:800 .58rem var(--sans);color:var(--mint);border:1.5px solid var(--mint);border-radius:99px;padding:0 5px;margin-left:3px}
 .xcard.xwide{--w:min(1560px,calc(100vw - 32px));width:var(--w);margin-left:calc((100% - var(--w)) / 2)}
 .xp tbody td.xdate{font-size:.74rem;line-height:1.35}
-.xccy{color:var(--muted);font:700 .66rem var(--sans)}
+.xccy{color:var(--muted);font:700 .7rem var(--sans)}
 .xp .xactc{width:100px;max-width:100px}
 .xp th.xr,.xp td.xqty{text-align:right}
 .xp td.xqty .xnum{font:600 .76rem var(--mono)}
-.xp td.xqty .xsym{font-weight:800;font-size:.74rem}
+.xp td.xqty .xsym{font-weight:800;font-size:.74rem;display:inline-block;max-width:170px;white-space:normal;overflow-wrap:anywhere;vertical-align:top}
+@media(max-width:1180px){.xp td.xqty .xsym{max-width:110px}}
+/* wallet chip: 3rd line of the date cell (shown with 2+ wallets) */
+.wtag{display:block;width:fit-content;max-width:84px;margin-top:3px;padding:0 6px;border:1px solid var(--muted);border-radius:99px;color:var(--muted);font:700 .62rem/1.5 var(--sans);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:1180px){.wtag{max-width:74px}}
 .xp td.xqty .xpill{display:table;margin:3px 0 0 auto}
 .xp td.xfee{font-size:.7rem;color:var(--muted)}
-.xtot{display:block;margin-top:3px;color:var(--muted);font:600 .66rem var(--mono)}
+.xtot{display:block;margin-top:3px;color:var(--muted);font:600 .7rem var(--mono);white-space:normal}
 .xtot:empty{display:none}
 /* pills and currency go under the value so the narrow columns don't push the table wider */
 .xp tbody td.xstack .xpill,.xp tbody td.xstack .xccy{display:table;margin:3px 0 0}
 .xp tbody td.xnum{font:600 .76rem var(--mono)}
-.xcomment{font-size:.76rem;font-weight:700;min-width:240px;max-width:330px;white-space:normal!important;line-height:1.45}
-.xbasis{font-size:.62rem;font-weight:500;color:var(--muted);opacity:.8;margin-top:2px;line-height:1.4;word-break:break-all}
+.xcomment{font-size:.76rem;font-weight:700;min-width:240px;max-width:330px;white-space:normal!important;overflow-wrap:anywhere;line-height:1.45}
+.xbasis{font-size:.7rem;font-weight:500;color:var(--muted);opacity:.8;margin-top:2px;line-height:1.4;word-break:break-all}
 .xcomment .xinfo{font-weight:500}
 .xcomment .xinfo.xw{color:var(--warn);font-weight:700}
 .xcomment .xinfo b{color:var(--text);font-weight:700}
-.xinfo{font-size:.68rem;color:var(--muted);margin-top:2px;line-height:1.5}
+.xinfo{font-size:.7rem;color:var(--muted);margin-top:2px;line-height:1.5}
 .xw{color:var(--warn);font-weight:800}
 .xmono{font-family:var(--mono)}
 .xreg{color:var(--brand);font-weight:800}
@@ -430,12 +442,12 @@ body.gated>*:not(.gate){display:none!important}
         <button class="btn ghost" id="xCsv">📥 CSVダウンロード</button>
       </div>
     </div>
-    <div class="xopts"><select class="xact" id="xWalletFilter" title="ウォレットで絞り込み"></select></div>
-    <p class="xnote xtight">💡 登録したすべてのウォレットをまとめて読み込み、1つの表・1つのCSVにします（右上でウォレットごとに表示を絞り込めます）。チェックした行だけがCSVに出力されます（初期状態は「出力対象」の行）。Actionは行ごとに変更できます。値のセルをクリックするとコピーできるので、手動入力にも使えます。
+    <div class="xopts"><span class="xfnote" id="xWfNote" hidden><span id="xWfText"></span><button type="button" class="xfclear" id="xWfClear">解除</button></span><select class="xact" id="xWalletFilter" title="ウォレットで絞り込み"></select></div>
+    <p class="xnote xtight">💡 登録したすべてのウォレットをまとめて読み込み、1つの表・1つのCSVにします（右上でウォレットごとに表示を絞り込めます。絞り込みは表示だけで、CSVは全体のままです）。「CSV」列にチェックした行だけがCSVに出力されます（初期状態は「出力対象」の行）。Actionは行ごとに変更できます。値のセルをクリックするとコピーできるので、手動入力にも使えます。
       <a href="https://support.cryptact.com/hc/ja/articles/4413123225497" target="_blank" rel="noopener">カスタムコインの作り方↗</a>
       <a href="https://support.cryptact.com/hc/ja/articles/360002571312" target="_blank" rel="noopener">カスタムファイルの作り方↗</a></p>
     <div class="xtable-wrap"><table class="xtx" id="xTable">
-      <thead><tr><th>出力</th><th>Status</th><th>日時</th><th>Action</th><th class="xr">数量</th><th>Price</th><th>Counter</th><th>Fee</th><th>Comment</th><th>Tx</th></tr></thead>
+      <thead><tr><th>CSV</th><th>状態</th><th>日時</th><th>Action</th><th class="xr">数量</th><th>Price</th><th>Counter</th><th>Fee</th><th>Comment</th><th>Tx</th></tr></thead>
       <tbody id="xBody"></tbody>
     </table></div>
   </div>
@@ -928,7 +940,7 @@ const KIND={
   royalty:{label:"ロイヤリティ受取",cls:"b-buy",cryptact:"要判断（XRPの受取収入）"},
   fee:{label:"手数料のみ",cls:"b-other",cryptact:"要判断（手数料系の種類）"},
 };
-let state={rows:[],names:{},filter:"all",done:new Set()};
+let state={rows:[],names:{},filter:"all",done:new Set(),checked:new Set()};
 
 (function init(){
   const today=new Date(Date.now()+9*3600e3).toISOString().slice(0,10);
@@ -977,7 +989,7 @@ async function run(){
     // only the three kinds needed for Cryptact input: buy, sell, free receive
     attachAcquisitions(rows);
     state.rows=rows.filter(r=>SHOW_KINDS.has(r.kind)&&r.ts>=fromTs);state.uris=uris;state.addr=addr;
-    Object.assign(state,{txs:[...txs],minLedger:txs.minLedger,complete:txs.complete,fromTs,range,acqLoading:false});
+    Object.assign(state,{txs:[...txs],minLedger:txs.minLedger,complete:txs.complete,checked:new Set(),fromTs,toTs,range,acqLoading:false});
     render();
     status(doneMsg());
     $("results").style.display="block";
@@ -1013,42 +1025,137 @@ function attachAcquisitions(rows){
 }
 function acqText(r){
   const a=r.acq;
-  if(!a)return state.complete?"取得履歴なし（別のアドレスで取得した可能性）":"";
+  if(!a)return state.complete||state.checked.has(r.nft)?"取得履歴なし（別のアドレスで取得した可能性）":"";
   return `${KIND[a.kind].label} ${jst(a.ts).slice(0,16)} / 価格 ${fmt(a.price)} ${a.ccy} / 手数料 ${fmt(a.fee)} ${a.feeCcy||"XRP"}`;
 }
-// Sales whose acquisition predates the range: read older history only until those NFTs show up
+// Sales whose acquisition predates the range. First the per-NFT index (nft_history) finds the ledgers,
+// then only the history around them is read; without that index (or if anything is left) the older history is read in full.
+const needAcq=()=>new Set(state.rows.filter(r=>r.kind==="sell"&&!r.acq&&!state.checked.has(r.nft)).map(r=>r.nft));
 async function loadOlder(){
   if(state.acqLoading)return;
-  const need=new Set(state.rows.filter(r=>r.kind==="sell"&&!r.acq).map(r=>r.nft));
+  const need=needAcq();
   if(!need.size||busy)return;
   setBusy(true);
   state.acqLoading=true;render();
-  const addr=state.addr,found=new Set();let cutoff=null;
   try{
-    const older=await fetchHistory(addr,0,state.fromTs,(page,n,oldest)=>{
-      status(`取得履歴を遡って取得中… ${page}ページ目 / 見つかった ${found.size}/${need.size}件`+(oldest?` / ${jst(oldest+RIPPLE_EPOCH).slice(0,10)}まで`:""));
-    },{ledgerMax:state.minLedger,stopAfter:t=>{
-      const id=t.meta&&(t.meta.nftoken_id||t.tx.NFTokenID);
-      if(id&&need.has(id))found.add(id);
-      const ts=t.date+RIPPLE_EPOCH;
-      // keep one more day after the last hit so a paid-mint payment just before it is included
-      if(found.size===need.size&&cutoff===null)cutoff=ts-MINT_PAY_LOOKBACK;
-      return cutoff!==null&&ts<cutoff;
-    }});
-    const seen=new Set(state.txs.map(t=>t.hash));
-    state.txs=[...older.filter(t=>!seen.has(t.hash)),...state.txs].sort((a,b)=>a.date-b.date);
-    state.minLedger=Math.min(state.minLedger,older.minLedger);
-    if(older.complete)state.complete=true;
-    status("解析中…");
-    const{rows,uris,unpaidMints}=await analyze(addr,state.txs,{linkOfferFees:$("optFees").checked});
-    attachAcquisitions(rows);
-    state.rows=rows.filter(r=>SHOW_KINDS.has(r.kind)&&r.ts>=state.fromTs);
-    Object.assign(state.uris,uris);
-    state.unpaid=unpaidMints.filter(p=>p.ts>=state.fromTs);
+    let txs=null;
+    try{txs=await acqWindows(state.addr,need)}catch(e){if(e.message===CANCELLED)throw e} // e.g. unknownCmd: node without nft_history
+    if(txs)await mergeOlder(txs);
+    const left=needAcq();
+    if(left.size)await scanOlder(left);
     status(doneMsg());
     if($("optNames").checked)loadNames();
   }catch(e){status(failMsg(e),e.message!==CANCELLED)}
   finally{setBusy(false);state.acqLoading=false;render()}
+}
+// Read older history until those NFTs show up
+async function scanOlder(need){
+  const found=new Set();let cutoff=null;
+  const older=await fetchHistory(state.addr,0,state.fromTs,(page,n,oldest)=>{
+    status(`取得履歴を遡って取得中… ${page}ページ目 / 見つかった ${found.size}/${need.size}件`+(oldest?` / ${jst(oldest+RIPPLE_EPOCH).slice(0,10)}まで`:""));
+  },{ledgerMax:state.minLedger,stopAfter:t=>{
+    const id=t.meta&&(t.meta.nftoken_id||t.tx.NFTokenID);
+    if(id&&need.has(id))found.add(id);
+    const ts=t.date+RIPPLE_EPOCH;
+    // keep one more day after the last hit so a paid-mint payment just before it is included
+    if(found.size===need.size&&cutoff===null)cutoff=ts-MINT_PAY_LOOKBACK;
+    return cutoff!==null&&ts<cutoff;
+  }});
+  state.minLedger=Math.min(state.minLedger,older.minLedger);
+  if(older.complete)state.complete=true;
+  await mergeOlder(older);
+}
+// Older transactions join the fetched ones (ledger order) and everything is analyzed again
+async function mergeOlder(older){
+  const seen=new Set(state.txs.map(t=>t.hash));
+  state.txs=[...older.filter(t=>!seen.has(t.hash)),...state.txs].sort((a,b)=>a.date-b.date||a.ledger-b.ledger||a.meta.TransactionIndex-b.meta.TransactionIndex);
+  status("解析中…");
+  const{rows,uris,unpaidMints}=await analyze(state.addr,state.txs,{linkOfferFees:$("optFees").checked});
+  attachAcquisitions(rows);
+  state.rows=rows.filter(r=>SHOW_KINDS.has(r.kind)&&r.ts>=state.fromTs);
+  Object.assign(state.uris,uris);
+  state.unpaid=unpaidMints.filter(p=>p.ts>=state.fromTs);
+}
+// Same test as analyze: the account minted the NFT, or took the buyer side of an accepted offer
+function acquiredBy(t,addr){
+  const{tx,meta}=t;
+  if(!meta||meta.TransactionResult!=="tesSUCCESS")return false;
+  if(tx.TransactionType==="NFTokenMint")return tx.Account===addr;
+  if(tx.TransactionType!=="NFTokenAcceptOffer")return false;
+  const b=deletedOffers(meta).find(o=>o.id===tx.NFTokenBuyOffer);
+  return(b?b.Owner:tx.Account)===addr;
+}
+// Returns the mint payments and NFT transactions around the latest acquisition (before the sale) of each NFT.
+// NFTs that this account never acquired go to state.checked. Throws if the node has no nft_history.
+async function acqWindows(addr,need){
+  const first={},ledgerOf=new Map(state.txs.map(t=>[t.hash,t.ledger]));
+  for(const r of state.rows)if(r.kind==="sell"&&need.has(r.nft)&&!first[r.nft])first[r.nft]=r;
+  const ids=Object.keys(first),anchors=[],none=[];
+  await pool(ids,async id=>{
+    const sale=first[id];let marker;
+    while(true){
+      checkCancel();
+      const p={nft_id:id,limit:100,forward:false,ledger_index_min:-1,ledger_index_max:ledgerOf.get(sale.hash)??-1,api_version:2};
+      if(marker)p.marker=marker;
+      const r=await rpc("nft_history",p);
+      for(const raw of r.transactions||[]){const t=normalize(raw);if(t.date+RIPPLE_EPOCH<sale.ts&&acquiredBy(t,addr))return anchors.push({ts:t.date+RIPPLE_EPOCH,ledger:t.ledger})}
+      if(!r.marker)return none.push(id);
+      marker=r.marker;
+    }
+  },(i,n)=>status(`取得した時の取引を探しています… ${i}/${n}`));
+  const known=new Map();
+  if(anchors.length){
+    // the start of the range too, so paid-mint batches that run into it are read whole
+    anchors.push({ts:state.fromTs,ledger:state.minLedger,start:true});
+    anchors.sort((a,b)=>a.ts-b.ts);
+    const groups=[];
+    for(const a of anchors){const g=groups[groups.length-1];if(g&&a.ts-g[g.length-1].ts<=2*86400)g.push(a);else groups.push([a])}
+    await pool(groups,g=>readAround(addr,g[0],g[g.length-1],known),(i,n)=>status(`取得した時の前後の履歴を読み込み中… ${i}/${n}`));
+  }
+  for(const id of none)state.checked.add(id);
+  return[...known.values()];
+}
+// Runs fn over items, 4 at a time
+async function pool(items,fn,onDone){
+  let i=0,done=0,stopped=false; // one failure (or a stop) ends the other workers too, so they cannot keep reading or overwrite the status
+  const worker=async()=>{while(i<items.length&&!stopped){try{await fn(items[i++])}catch(e){stopped=true;throw e}if(!stopped&&onDone)onDone(++done,items.length)}};
+  await Promise.all([worker(),worker(),worker(),worker()]);
+}
+// Reads every transaction of the account from first to last, widened until matchPaidMints gives the same batches
+// as with the whole history: before the start no mint payment within 24 h and no NFT acceptance within 15 min
+// (nothing earlier can join), after the end at least 3 h past the last acquisition and 15 min without an acceptance.
+async function readAround(addr,first,last,known){
+  const H3=3*3600,H24=24*3600,M15=900;
+  const accept=t=>t.tx.TransactionType==="NFTokenAcceptOffer";
+  let S=first.ts,E=last.ts+H3;
+  await Promise.all([
+    readFrom(addr,last.ledger,true,known,(t,ts)=>{
+      if(ts<S-H24)return true;
+      if(ts<S&&(isMintPayment(t,addr)||accept(t)&&ts>=S-M15))S=ts;
+    }),
+    // after the range start the fetched transactions are already complete
+    !last.start&&readFrom(addr,last.ledger,false,known,(t,ts)=>{
+      if(ts>E||ts>state.toTs)return true;
+      if(accept(t))E=Math.max(E,ts+M15);
+    })]);
+}
+// Pages account_tx from a ledger backwards or forwards until stop(t,ts) returns true; keeps what fetchHistory keeps.
+// Pages start small (a window is usually a day or two) and double, since big pages with metadata are slow.
+async function readFrom(addr,ledger,back,known,stop){
+  let marker,limit=20;
+  while(true){
+    checkCancel();
+    const p={account:addr,limit,forward:!back,ledger_index_min:back?-1:ledger,ledger_index_max:back?ledger:-1,api_version:2};
+    if(marker)p.marker=marker;
+    const r=await rpc("account_tx",p);
+    for(const raw of r.transactions||[]){
+      const t=normalize(raw),ts=t.date+RIPPLE_EPOCH;
+      if(ts<=state.toTs&&(isMintPayment(t,addr)||NFT_TYPES.has(t.tx.TransactionType)))known.set(t.hash,t);
+      if(stop(t,ts))return;
+    }
+    if(!r.marker)return;
+    marker=r.marker;limit=Math.min(400,limit*2);
+  }
 }
 function coinName(r){
   if(!r.nft)return"";
@@ -1882,6 +1989,7 @@ async function run(){
     const worker=async()=>{while(next<toValue.length){const ev=toValue[next++];await valueEvent(ev);xStatus(`円換算の価格を調べています… ${++doneN}/${toValue.length}`)}};
     await Promise.all([worker(),worker(),worker(),worker()]);
     XS.events=events;XS.feeOnly=feeOnly;XS.nftEvents=nftEvents;XS.range=range; // only once the fetch finished, so a stopped fetch keeps the old rows' name
+    XS.wfilter=""; // a new fetch clears the wallet filter
     buildRows();
     render();
     const chk=await checkBalances(walletTxs);
@@ -2179,9 +2287,13 @@ function totalStr(r){
   return`= ${c.xrp?fmt(t):decStr(t,10)} ${c.symbol}`;
 }
 function commentDetail(r){
-  const line=[r.wallet&&!r.self?`<b>${esc(walletName(r.wallet))}</b>`:"",r.info].filter(Boolean).join(" ・ ");
+  const line=r.info||"";
   return(line?`<div class="xinfo">${line}</div>`:"")+(r.warn?`<div class="xinfo xw">⚠ ${esc(r.warn)}</div>`:"")+(r.basis?`<div class="xbasis">円換算: ${esc(r.basis)}</div>`:"");
 }
+const STATUS_LABEL={export:"出力",skip:"スキップ",review:"要確認",scam:"SCAM"};
+const ROW_TITLE={scam:"SCAMとして自動判定した行です（初期状態ではCSVに出力しません）"};
+// wallet chip under the date; only when 2+ wallets are registered
+const walletTag=r=>r.wallet&&!r.self&&XS.wallets.filter(w=>validAddr(w.address)&&!w.tag).length>1?`<span class="wtag" title="${esc(walletName(r.wallet)+" "+r.wallet.address)}">${esc(walletName(r.wallet))}</span>`:"";
 const baseHtml=b=>esc(b.symbol)+(b.supported||b.fiat?"":' <span class="xpill">custom</span>');
 function render(){
   const rows=XS.rows||[];
@@ -2190,30 +2302,37 @@ function render(){
   $("xsTotal").textContent=rows.length;$("xsExport").textContent=cnt.export;$("xsSkip").textContent=cnt.skip;$("xsReview").textContent=cnt.review;
   $("xsReview").parentElement.classList.toggle("has-items",cnt.review>0);
   $("xsSkipFee").textContent=`（手数料: ${fmt(skipFee)} XRP${cnt.scam?` ／ ほかにSCAM ${cnt.scam}件`:""}）`;
-  $("xtScam").textContent=cnt.scam;$("xtScam").parentElement.hidden=!cnt.scam;
-  $("xtAll").textContent=rows.length;$("xtExport").textContent=cnt.export;$("xtSkip").textContent=cnt.skip;$("xtReview").textContent=cnt.review;
   $("xStatsCard").hidden=$("xResults").hidden=!rows.length;
   $("xEmpty").hidden=!!rows.length||!XS.events;
   selCount();
   // wallet filter: all registered wallets are read together; this only narrows the view (CSV still uses the checked rows)
-  const wf=$("xWalletFilter"),cur=XS.wfilter||"";
+  const wf=$("xWalletFilter");
   const ws=[...new Set(rows.flatMap(r=>[r.wallet,r.from,r.to]).filter(Boolean))];
+  if(XS.wfilter&&!ws.some(w=>w.address===XS.wfilter))XS.wfilter=""; // the chosen wallet has no rows after a re-fetch: back to all (the select could not show it)
+  const cur=XS.wfilter||"";
   wf.innerHTML=`<option value="">すべてのウォレット（${XS.wallets.filter(w=>validAddr(w.address)&&!w.tag).length}件）</option>`+ws.map(w=>`<option value="${w.address}"${w.address===cur?" selected":""}>${esc(walletName(w))}</option>`).join("");
   const inWallet=r=>!cur||[r.wallet,r.from,r.to].some(w=>w&&w.address===cur);
+  // tab counts follow the wallet filter (stats card and CSV stay global)
+  const fc={export:0,skip:0,review:0},inW=rows.filter(inWallet);
+  for(const r of inW)if(fc[r.status]!==undefined)fc[r.status]++;
+  $("xtAll").textContent=inW.length;$("xtExport").textContent=fc.export;$("xtSkip").textContent=fc.skip;$("xtReview").textContent=fc.review;
+  $("xtScam").textContent=inW.length-fc.export-fc.skip-fc.review;$("xtScam").parentElement.hidden=!cnt.scam;
+  $("xWfNote").hidden=!cur;
+  if(cur)$("xWfText").textContent=`絞り込み中: ${walletName(ws.find(w=>w.address===cur))}（表示だけ。CSVは全体のまま）`;
   const shown=rows.filter(r=>(XS.filter==="all"||r.status===XS.filter)&&inWallet(r));
   $("xBody").innerHTML=shown.map(r=>{
     const i=rows.indexOf(r);
-    const badge=r.self?'<span class="sbadge s-skip">送金(自分)</span>':r.badge?`<span class="sbadge s-skip">${esc(r.badge)}</span>`:`<span class="sbadge s-${r.status}">${r.status.toUpperCase()}</span>`;
+    const badge=r.self?'<span class="sbadge s-skip">送金(自分)</span>':r.badge?`<span class="sbadge s-skip">${esc(r.badge)}</span>`:`<span class="sbadge s-${r.status}">${STATUS_LABEL[r.status]||r.status}</span>`;
     // Action shows only the code (fixed width); the Japanese meaning is in the tooltip
     const opts=Object.entries(ACTION_OPTIONS).map(([v,l])=>`<option value="${v}" title="${esc(l)}"${r.action===v?" selected":""}>${v}</option>`).join("");
     const price=(r.needPrice?`<input class="xprice" data-i="${i}" placeholder="円" value="${esc(r.price)}" inputmode="decimal">`:`<span class="cp" data-v="${esc(r.price)}" title="${esc(r.price)}">${dispNum(r.price)}</span>${r.auto?' <span class="xpill xauto">自動</span>':""}`)+`<span class="xtot">${totalStr(r)}</span>`;
     const fee=Number(r.fee)?`<span class="cp" data-v="${esc(r.fee)}" title="${esc(r.fee)}">${dispNum(r.fee)}</span><span class="xccy">${esc(r.feeCcy)}</span>`:'<span class="xmuted">–</span>';
     const links=`<a class="xtxl" href="https://livenet.xrpl.org/transactions/${r.hash}" target="_blank" rel="noopener">${r.hash.slice(0,8)}…</a>`+
       (r.flareTx?`<br><a class="xtxl" href="${(r.net||NETS.Flare).tx}${r.flareTx}" target="_blank" rel="noopener">${(r.net||NETS.Flare).name}↗</a>`:"");
-    return`<tr class="row-${r.self?"skip":r.status}">
+    return`<tr class="row-${r.self?"skip":r.status}"${ROW_TITLE[r.status]&&!r.self?` title="${ROW_TITLE[r.status]}"`:""}>
       <td><input type="checkbox" class="xchk" data-i="${i}"${r.checked?" checked":""}></td>
       <td>${badge}</td>
-      <td class="cp xdate" data-v="${jst(r.ts)}">${jst(r.ts).replace(" ","<br>")}</td>
+      <td class="cp xdate" data-v="${jst(r.ts)}">${jst(r.ts).replace(" ","<br>")}${walletTag(r)}</td>
       <td><select class="xact xactc" data-i="${i}" title="${esc(ACTION_OPTIONS[r.action]||r.action)}">${opts}</select></td>
       <td class="xqty"><span class="cp xnum" data-v="${esc(r.volume)}" title="${esc(r.volume)}">${dispNum(r.volume)}</span> <span class="cp xsym" data-v="${esc(r.base.symbol)}">${esc(r.base.symbol)}</span>${r.base.supported||r.base.fiat?"":'<span class="xpill">custom</span>'}</td>
       <td class="xstack xnum">${price}</td>
@@ -2342,6 +2461,7 @@ $("xStop").onclick=stop;
 $("xCsv").onclick=downloadCsv;
 $("xShowClosed").onchange=renderLedger;
 $("xWalletFilter").onchange=e=>{XS.wfilter=e.target.value;render();toListTop()};
+$("xWfClear").onclick=()=>{XS.wfilter="";render();toListTop()};
 $("xSeg").querySelectorAll(".seg-btn").forEach(b=>b.onclick=()=>{
   $("xSeg").querySelectorAll(".seg-btn").forEach(x=>x.classList.toggle("on",x===b));XS.filter=b.dataset.f;render();toListTop();
 });
@@ -2373,7 +2493,10 @@ const pick=$("addrPick");if(pick)pick.onchange=()=>{if(pick.value)$("addr").valu
 // Tabs (remembered per browser, and addressable as #xrpl / #cafe)
 (()=>{
   const tabs={xrpl:["tabXrpl","paneXrpl","heroXrpl"],cafe:["tabCafe","paneCafe","heroCafe"]};
+  let cur,pos={}; // scroll position per tab, restored when coming back
   function show(key){
+    if(cur===key)return;
+    const had=cur;if(had)pos[had]=scrollY;cur=key;
     for(const [k,[t,p,h]] of Object.entries(tabs)){
       const on=k===key;
       document.getElementById(t).setAttribute("aria-selected",String(on));
@@ -2382,6 +2505,7 @@ const pick=$("addrPick");if(pick)pick.onchange=()=>{if(pick.value)$("addr").valu
     try{localStorage.setItem("xtax_tab",key)}catch{}
     try{history.replaceState(null,"","#"+key)}catch{}
     dispatchEvent(new Event("resize")); // lets the wallet list re-measure once visible
+    if(had)scrollTo(0,pos[key]||0);
   }
   document.getElementById("tabXrpl").onclick=()=>show("xrpl");
   document.getElementById("tabCafe").onclick=()=>show("cafe");
