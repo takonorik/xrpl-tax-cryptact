@@ -40,20 +40,29 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .hero-in{max-width:1180px;margin:0 auto}
 .catch{font-size:clamp(1.4rem,4.4vw,1.95rem);font-weight:900;line-height:1.35;letter-spacing:-.01em;color:var(--hero-text)}
 .catch em{font-style:normal;background:var(--brand);color:#fff;padding:0 .3em;border-radius:8px}
-a.lead-link{}
-.lead a{color:var(--brand);font-weight:800}
-.lead{font-size:.8rem;font-weight:500;color:var(--hero-sub);margin-top:8px;line-height:1.7}
+/* tab chooser + 3-step strip (in the hero, per tab) */
+.tabcards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:16px}
+.tabcard{display:block;width:100%;text-align:left;font-family:var(--sans);color:var(--text);background:var(--surface);border:2px solid var(--brand-soft);border-radius:18px;padding:11px 16px;cursor:pointer}
+.tabcard:hover{border-color:var(--brand)}
+.tabcard.on{border-color:var(--brand);background:var(--brand-tint);box-shadow:4px 4px 0 var(--brand);cursor:default}
+.tabcard .k{display:block;font-size:.66rem;font-weight:900;color:var(--brand);letter-spacing:.04em}
+.tabcard b{display:block;font-size:1rem;font-weight:900;margin-top:2px}
+.tabcard small{display:block;font-size:.7rem;font-weight:600;color:var(--muted);margin-top:3px;line-height:1.5}
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}
+.step{display:flex;align-items:center;gap:10px;min-width:0;padding:9px 12px;border:2px solid var(--brand-soft);border-radius:14px;background:var(--surface)}
+.step .sn{flex:none;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font:900 .72rem var(--mono);border:2px solid var(--brand-soft);color:var(--muted)}
+.step b{display:block;font-size:.8rem;font-weight:900}
+.step small{display:block;font-size:.68rem;font-weight:600;color:var(--muted);margin-top:1px;line-height:1.4}
+.step.cur{border-color:var(--brand);background:var(--brand-tint)}
+.step.cur .sn{background:var(--brand);border-color:var(--brand);color:#fff}
+.step.done{background:transparent}
+.step.done b{color:var(--muted)}
+.step.done .sn{border-color:var(--buy);color:var(--buy)}
+@media(max-width:720px){.steps{grid-template-columns:minmax(0,1fr);gap:6px}.step{padding:7px 12px}}
+@media(max-width:540px){.tabcard{padding:10px 12px}.tabcard b{font-size:.9rem}}
 
 /* layout */
 .wrap{max-width:1180px;margin:0 auto;padding:0 16px 80px}
-.layout{display:block}
-.panel{position:relative;margin-top:-60px;background:var(--surface);border:2px solid var(--line);border-radius:26px;padding:18px;box-shadow:6px 6px 0 var(--shadow)}
-.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
-.field{background:var(--field);border-radius:16px;padding:10px 14px;border:2px solid transparent;transition:border-color .15s;min-width:0;margin-bottom:10px}
-.field:focus-within,.field:hover{border-color:var(--brand)}
-label.lbl{display:block;font-size:.66rem;font-weight:800;color:var(--brand);margin-bottom:5px}
-.field input{width:100%;border:0;background:transparent;color:var(--text);font:700 1rem var(--mono);outline:none}
-.field input::placeholder{color:var(--muted);opacity:.6}
 .opt-row{display:flex;align-items:flex-start;gap:8px;margin-top:10px;font-size:.76rem;font-weight:700;cursor:pointer;line-height:1.5}
 .opt-row input{margin-top:3px;accent-color:var(--brand);flex-shrink:0;width:16px;height:16px}
 .btn{width:100%;padding:15px;margin-top:14px;background:var(--btn-bg);color:var(--btn-fg);border:2px solid var(--line);border-radius:16px;font:900 .95rem var(--sans);cursor:pointer;transition:transform .1s,box-shadow .1s}
@@ -65,11 +74,12 @@ label.lbl{display:block;font-size:.66rem;font-weight:800;color:var(--brand);marg
 .btn.ghost{width:auto;margin:0;padding:9px 14px;background:var(--surface);color:var(--text);font-size:.76rem;border-radius:12px;box-shadow:3px 3px 0 var(--shadow)}
 .btn.ghost:hover{box-shadow:3px 3px 0 var(--brand)}
 .btn.ghost:active{transform:translate(2px,2px);box-shadow:none}
+#status:empty{display:none}
 #status,.status{font-size:.72rem;font-weight:700;color:var(--muted);margin-top:12px;font-family:var(--mono);line-height:1.6;min-height:1.2em}
 #status.err,.status.err{color:var(--sell)}
 
 /* results */
-.results{display:none;margin-top:28px}
+.results{display:none}
 .rh{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 4px 12px}
 .rt{font-size:1.05rem;font-weight:900}
 .rc{font-size:.8rem;font-weight:800;color:var(--brand)}
@@ -104,6 +114,10 @@ label.lbl{display:block;font-size:.66rem;font-weight:800;color:var(--brand);marg
 .chk{display:flex;align-items:center;gap:5px;font-size:.7rem;font-weight:800;color:var(--muted);cursor:pointer}
 .chk input{accent-color:var(--brand);width:15px;height:15px}
 .fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1px;background:var(--brand-soft)}
+/* the 8 short fields in one row on wide screens (weights: date and coin get more room), 4 per row on tablets, 2 on small phones-to-tablets */
+@media(min-width:1100px){.fields{grid-template-columns:.8fr 1.7fr .7fr 1.5fr 1fr .8fr 1fr .8fr}.f{padding:9px 12px}}
+@media(min-width:700px) and (max-width:1099px){.fields{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(min-width:541px) and (max-width:699px){.fields{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .f{background:var(--surface);padding:9px 14px;cursor:pointer;position:relative}
 .f:hover{background:var(--brand-tint)}
 .f .k{font-size:.62rem;font-weight:800;color:var(--muted)}
@@ -128,14 +142,6 @@ label.lbl{display:block;font-size:.66rem;font-weight:800;color:var(--brand);marg
 .help b{color:var(--text);font-weight:800}
 code{font:700 .72rem var(--mono);background:var(--brand-soft);color:var(--text);padding:1px 5px;border-radius:5px}
 
-@media(min-width:1024px){
-  .layout{display:grid;grid-template-columns:400px minmax(0,1fr);gap:32px;align-items:start}
-  .layout>.panel{position:sticky;top:78px;max-height:calc(100vh - 96px);overflow:auto}
-  .layout>.panel .grid2{grid-template-columns:minmax(0,1fr)}
-  .col-results{min-width:0;margin-top:-60px}
-  .results{margin-top:0}
-}
-@media(max-width:540px){.grid2{grid-template-columns:minmax(0,1fr)}.panel{padding:14px}}
 
 [hidden]{display:none!important}
 .tabs{display:flex;gap:4px;padding:4px;border:2px solid var(--line);border-radius:99px;background:var(--surface)}
@@ -193,6 +199,12 @@ code{font:700 .72rem var(--mono);background:var(--brand-soft);color:var(--text);
 .xgroup label{display:block;font-size:.68rem;font-weight:800;color:var(--brand);margin-bottom:4px}
 .xgroup input[type=date]{width:100%;border:0;background:transparent;color:var(--text);font:800 1rem var(--sans);outline:none}
 .xgroup .wlist{margin-top:6px}
+/* xrp.cafe form: address | start | end | run on one row, options below */
+.cform{display:grid;grid-template-columns:minmax(0,1fr) 170px 170px 200px;gap:10px;align-items:stretch}
+.cwallet input{width:100%;border:0;background:transparent;color:var(--text);font:700 1rem var(--mono);outline:none}
+.cwallet input::placeholder{color:var(--muted);opacity:.6}
+.copts{grid-column:1/-1;display:flex;gap:10px;flex-wrap:wrap}
+@media(max-width:900px){.cform{grid-template-columns:repeat(2,minmax(0,1fr))}.cwallet,.cform>.btn{grid-column:1/-1}}
 .xopt{display:flex;align-items:center;gap:8px;font-size:.8rem;font-weight:800;cursor:pointer}
 .xopt input{accent-color:var(--brand);width:16px;height:16px;flex-shrink:0;margin:0}
 .btn.xfetch{flex:1;margin:0;min-height:52px}
@@ -201,6 +213,17 @@ code{font:700 .72rem var(--mono);background:var(--brand-soft);color:var(--text);
 .xnote strong{color:var(--text);font-weight:800}
 .xnote a{color:var(--brand);font-weight:800;text-decoration:none;margin-left:6px}
 .xnote.xtight{margin:0 0 12px}
+.xnote .xrow{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 0}
+.xnote .xrow a:first-of-type{margin-left:10px}
+.xmore{margin-top:4px}
+.xmore>summary{cursor:pointer;display:inline-block;color:var(--brand);font-weight:800;list-style:none}
+.xmore>summary::-webkit-details-marker{display:none}
+.xmore>summary::after{content:" ▸"}
+.xmore[open]>summary::after{content:" ▾"}
+.xmore>p{margin-top:4px}
+.xnext{display:flex;align-items:center;justify-content:space-between;gap:8px 14px;flex-wrap:wrap;margin-bottom:24px;padding:10px 14px;border:2px solid var(--brand-soft);border-radius:16px;background:var(--brand-tint);font-size:.82rem;font-weight:800;line-height:1.5}
+.xnext.review{border-color:var(--brand)}
+.xnext .mini{background:var(--brand);border-color:var(--brand);color:#fff;white-space:nowrap}
 .xloader{display:none;align-items:center;gap:12px;padding:14px 18px;margin-bottom:24px;border:2px dashed var(--brand);border-radius:20px;background:var(--brand-tint);font-size:.82rem;font-weight:700}
 .xloader.on{display:flex}
 .xloader .status{flex:1;margin:0}
@@ -278,7 +301,6 @@ code{font:700 .72rem var(--mono);background:var(--brand-soft);color:var(--text);
 .xprice{width:90px;border:2px solid var(--brand);border-radius:8px;background:var(--surface);color:var(--text);padding:4px 6px;font:700 .76rem var(--mono)}
 .xpill.xauto{color:var(--buy);border-color:var(--buy)}
 .xpill{font:800 .58rem var(--sans);color:var(--mint);border:1.5px solid var(--mint);border-radius:99px;padding:0 5px;margin-left:3px}
-.xcard.xwide{--w:min(1560px,calc(100vw - 32px));width:var(--w);margin-left:calc((100% - var(--w)) / 2)}
 .xp tbody td.xdate{font-size:.74rem;line-height:1.35}
 .xccy{color:var(--muted);font:700 .7rem var(--sans)}
 .xp .xactc{width:100px;max-width:100px}
@@ -354,12 +376,20 @@ body.gated>*:not(.gate){display:none!important}
 <header class="hero"><div class="hero-in">
   <div id="heroXrpl">
     <h1 class="catch">XRPLの取引を、<em>クリプタクト</em>の入力欄ごとに。</h1>
-    <p class="lead">登録したウォレットと期間から、FXRPのミント・償還（Smart Accounts含む）、DEXのスワップ、AMM・Doppler Vaultの預け入れ・引き出し、トークンの受け取り（報酬・エアドロ）、登録していない相手との送受金、ウォレット間の送金を読み取ります。FXRPの手数料はFlare側の記録と照合して正確に出します。NFT（xrp.cafeなど）の取引は、「NFTの売買も出力する」にチェックを入れるとこの表にも入ります（<a href="#cafe" onclick="document.getElementById('tabCafe').click();return false">xrp.cafeタブ</a>と同じ判定）。</p>
+    <div class="tabcards">
+      <button type="button" class="tabcard on" data-go="xrpl" aria-current="true"><span class="k">XRPL</span><b>まとめてCSVにする</b><small>FXRP・DEX・AMM・送受金（NFTも追加できます）</small></button>
+      <button type="button" class="tabcard" data-go="cafe"><span class="k">xrp.cafe</span><b>NFTを1件ずつ確認する</b><small>手入力用の表示・取得原価を調べる</small></button>
+    </div>
+    <div class="steps" id="xSteps"></div>
   </div>
   <div id="heroCafe" hidden>
-  <h1 class="catch">NFTの売買を、<em>クリプタクト</em>の入力欄ごとに。</h1>
-  <p class="lead">アドレスと期間を入れると、買い・売り・無償受取・ミントをXRPLの台帳から直接読み取ります。xrp.cafeの手数料やロイヤリティも分けて計算します。</p>
-</div>
+    <h1 class="catch">NFTの売買を、<em>クリプタクト</em>の入力欄ごとに。</h1>
+    <div class="tabcards">
+      <button type="button" class="tabcard" data-go="xrpl"><span class="k">XRPL</span><b>まとめてCSVにする</b><small>FXRP・DEX・AMM・送受金（NFTも追加できます）</small></button>
+      <button type="button" class="tabcard on" data-go="cafe" aria-current="true"><span class="k">xrp.cafe</span><b>NFTを1件ずつ確認する</b><small>手入力用の表示・取得原価を調べる</small></button>
+    </div>
+    <div class="steps" id="cSteps"></div>
+  </div>
 </div></header>
 
 <main class="wrap">
@@ -385,10 +415,12 @@ body.gated>*:not(.gate){display:none!important}
         <button class="btn xfetch" id="xRun">取引を取得する →</button>
       </div>
     </div>
-    <p class="xnote">
+    <div class="xnote">登録したウォレットの取引を期間で読み込み、クリプタクトの行に仕訳します。
+      <details class="xmore"><summary>くわしく</summary><p>
       登録したウォレット（XRPLアドレス）の取引を期間で読み込み、クリプタクトの行に仕訳します。<strong>宛先タグを入れたもの</strong>は取引所の入金先として扱います（履歴は読まず、自分の口座への送金かどうかの判定だけに使います）。
       AMMの元本（期間より前の預け入れ）は、必要な分だけ自動で過去をさかのぼって読みます。FXRPの数量と手数料はFlare側の記録と照合します。
-    </p>
+    </p></details>
+    </div>
   </div>
 
   <div class="xloader" id="xLoader"><div class="xspinner"></div><span class="status" id="xStatus"></span><button type="button" class="mini" id="xStop">停止</button></div>
@@ -427,8 +459,11 @@ body.gated>*:not(.gate){display:none!important}
     </details>
   </div>
 
+  <!-- Next action -->
+  <div class="xnext" id="xNext" hidden><span id="xNextMsg"></span><button type="button" class="mini" id="xNextBtn" hidden></button></div>
+
   <!-- Results -->
-  <div class="xcard xwide" id="xResults" hidden>
+  <div class="xcard" id="xResults" hidden>
     <div class="xtoolbar" id="xToolbar">
       <div class="seg" id="xSeg">
         <button class="seg-btn on" data-f="all">すべて<span class="seg-n" id="xtAll">0</span></button>
@@ -443,9 +478,10 @@ body.gated>*:not(.gate){display:none!important}
       </div>
     </div>
     <div class="xopts"><span class="xfnote" id="xWfNote" hidden><span id="xWfText"></span><button type="button" class="xfclear" id="xWfClear">解除</button></span><select class="xact" id="xWalletFilter" title="ウォレットで絞り込み"></select></div>
-    <p class="xnote xtight">💡 登録したすべてのウォレットをまとめて読み込み、1つの表・1つのCSVにします（右上でウォレットごとに表示を絞り込めます。絞り込みは表示だけで、CSVは全体のままです）。「CSV」列にチェックした行だけがCSVに出力されます（初期状態は「出力対象」の行）。Actionは行ごとに変更できます。値のセルをクリックするとコピーできるので、手動入力にも使えます。
+    <div class="xnote xtight"><div class="xrow"><span>💡 「CSV」列にチェックした行だけがCSVに出ます。値のセルを押すとコピーできます。</span>
       <a href="https://support.cryptact.com/hc/ja/articles/4413123225497" target="_blank" rel="noopener">カスタムコインの作り方↗</a>
-      <a href="https://support.cryptact.com/hc/ja/articles/360002571312" target="_blank" rel="noopener">カスタムファイルの作り方↗</a></p>
+      <a href="https://support.cryptact.com/hc/ja/articles/360002571312" target="_blank" rel="noopener">カスタムファイルの作り方↗</a></div>
+      <details class="xmore"><summary>くわしく</summary><p>登録したすべてのウォレットをまとめて読み込み、1つの表・1つのCSVにします（右上でウォレットごとに表示を絞り込めます。絞り込みは表示だけで、CSVは全体のままです）。「CSV」列にチェックした行だけがCSVに出力されます（初期状態は「出力対象」の行）。Actionは行ごとに変更できます。値のセルをクリックするとコピーできるので、手動入力にも使えます。</p></details></div>
     <div class="xtable-wrap"><table class="xtx" id="xTable">
       <thead><tr><th>CSV</th><th>状態</th><th>日時</th><th>Action</th><th class="xr">数量</th><th>Price</th><th>Counter</th><th>Fee</th><th>Comment</th><th>Tx</th></tr></thead>
       <tbody id="xBody"></tbody>
@@ -479,63 +515,63 @@ body.gated>*:not(.gate){display:none!important}
   </details>
 </div>
 
-<div class="pane" id="paneCafe" hidden>
-<div class="layout">
-  <section class="panel">
-    <div class="field">
-      <label class="lbl" for="addr">XRPL ADDRESS</label>
-      <select class="pick" id="addrPick"></select>
-      <input type="text" id="addr" placeholder="r..." spellcheck="false">
+<div class="pane xp" id="paneCafe" hidden>
+  <!-- Input -->
+  <div class="xcard xpanel">
+    <div class="cform">
+      <div class="xgroup cwallet">
+        <label for="addr">XRPLアドレス</label>
+        <select class="pick" id="addrPick"></select>
+        <input type="text" id="addr" placeholder="r..." spellcheck="false">
+      </div>
+      <div class="xgroup"><label for="from">開始日 (JST)</label><input type="date" id="from"></div>
+      <div class="xgroup"><label for="to">終了日 (JST)</label><input type="date" id="to"></div>
+      <button class="btn xfetch" id="run">抽出する</button>
+      <div class="copts">
+        <label class="xgroup xopt"><input type="checkbox" id="optFees" checked> 約定したオファーの作成手数料を取引に合算</label>
+        <label class="xgroup xopt"><input type="checkbox" id="optNames" checked> NFT名をメタデータから取得</label>
+      </div>
     </div>
-    <div class="grid2">
-      <div class="field"><label class="lbl" for="from">FROM (JST)</label><input type="date" id="from"></div>
-      <div class="field"><label class="lbl" for="to">TO (JST)</label><input type="date" id="to"></div>
-    </div>
-    <label class="opt-row"><input type="checkbox" id="optFees" checked> 約定したオファーの作成手数料を取引に合算</label>
-    <label class="opt-row"><input type="checkbox" id="optNames" checked> NFT名をメタデータから取得</label>
-    <button class="btn" id="run">抽出する</button>
     <div id="status"></div>
-  </section>
-
-  <div class="col-results">
-    <div class="results" id="results">
-      <div class="rh"><span class="rt">抽出結果</span><span class="rc" id="rcount"></span></div>
-      <div class="stats" id="stats"></div>
-      <div class="toolbar" id="filters"></div>
-      <div class="csvrow">
-        <button class="btn ghost" id="csvCustom">クリプタクト用CSV</button>
-      </div>
-      <div class="helplinks">
-        <span>クリプタクトのヘルプ</span>
-        <a href="https://support.cryptact.com/hc/ja/articles/4413123225497" target="_blank" rel="noopener">カスタムコインの作り方↗</a>
-        <a href="https://support.cryptact.com/hc/ja/articles/48512489985177" target="_blank" rel="noopener">手動で取引を追加する方法↗</a>
-        <a href="https://support.cryptact.com/hc/ja/articles/5180166769561" target="_blank" rel="noopener">NFT取引の登録方法↗</a>
-        <a href="https://support.cryptact.com/hc/ja/articles/360002571312" target="_blank" rel="noopener">カスタムファイルの作り方↗</a>
-      </div>
-      <div class="vlist" id="list"></div>
-    </div>
-
-    <details class="help">
-      <summary>計算ルールと入力のしかた</summary>
-      <ul>
-        <li>各項目をクリックするとコピーできます。フォームの「価格参照をする」はOFFにし、決済通貨・手数料通貨は <code>XRP</code> を選んでください（円換算はクリプタクトが行います）。</li>
-        <li><b>価格</b>はxrp.cafeの履歴CSVの価格と同じになります。出品を買った場合は出品価格、オファー（入札）が承諾された場合とオークションは入札額です。</li>
-        <li><b>xrp.cafe手数料（1.589%）</b>：出品を買った場合は買い手が上乗せで払うため、<b>買い</b>の手数料に入ります。入札が承諾された場合やオークションは入札額から差し引かれるため、<b>売り</b>の手数料に入ります。</li>
-        <li><b>買い</b>の手数料 = （上乗せ分のxrp.cafe手数料）+ 自分が払ったネットワーク手数料（購入オファー作成分を含む）。</li>
-        <li><b>売り</b>の手数料 = （差し引かれたxrp.cafe手数料）+ ロイヤリティ + 自分が払ったネットワーク手数料（売りオファー作成分を含む）。</li>
-        <li><b>無償受取</b>：0 XRPで受け取ったNFT（無料ミント・エアドロップ・プレゼントなど）です。種類「ボーナス」、価格0、決済通貨JPYで入力し、手数料は入力しません。</li>
-        <li><b>主軸通貨</b>はクリプタクトのカスタムコインで使える文字（半角英大文字・数字・#）だけに変換しています（例: XRP Hugs65 → XRPHUGS65）。手動入力では「カスタムコイン/DeFiトークンを作成・利用する」をONにして、この文字列をそのまま入れます（USER- は自動で付きます）。CSVでは USER- を付けて出力します。日本語などを含む名前は、区別できるようにNFT IDの末尾を頭に付けます。</li>
-        <li><b>クリプタクト用CSV</b>は「入力済」にしていない行だけを出力します。手動入力とCSVアップロードで同じ取引を二重に登録しないためです。アップロードした後は、その行を「入力済」にしてください。</li>
-        <li><b>有料ミント</b>：xrp.cafeのローンチパッドでのミントです。XRPの送金（メモ「XRP for NFT mint by xrp.cafe」）と、その直後にxrp.cafeのミント用アカウントから0 XRPで届くNFTを組み合わせ、「買い」として表示します。価格は送金額 ÷ 届いた個数です。続けて何回か送金した場合は、合計額を個数で割り振ります。</li>
-        <li><b>ミント</b>：自分でミントしたNFTです。種類は「買い」、価格0で入力し、ミントのネットワーク手数料を手数料に入れます。</li>
-        <li><b>取得時（参考）</b>：売ったNFTをどう手に入れたかです。期間より前に取得したものは「取得原価がわからない場合」を押すと、必要な分だけ過去をさかのぼって調べます。</li>
-        <li>表示するのは「買い」「売り」「無償受取」「ミント」「有料ミント」だけです。送付・バーン・ロイヤリティ、約定しなかったオファーの手数料などは表示しません。</li>
-        <li>xrp.cafe経由かどうかは、ブローカーアカウント（売買 <code>rpx9JThQ2y37FaGeeJP7PXDUVEXY3PHZSC</code>、オークション <code>rKWCPCDKbn3cLRSFpUgqS5Nc3z3s6UUTu6</code>）か、メモに「xrp.cafe」が入っているかで判定しています。</li>
-        <li>データ元は公開XRPLノード（s2.ripple.com、つながらない場合はxrplcluster.com）です。税務上の最終判断はご自身または税理士の確認のうえで行ってください。</li>
-      </ul>
-    </details>
   </div>
-</div>
+
+  <!-- Results -->
+  <div class="xcard results" id="results">
+    <div class="rh"><span class="rt">抽出結果</span><span class="rc" id="rcount"></span></div>
+    <div class="stats" id="stats"></div>
+    <div class="toolbar" id="filters"></div>
+    <div class="csvrow">
+      <button class="btn ghost" id="csvCustom">クリプタクト用CSV</button>
+    </div>
+    <div class="helplinks">
+      <span>クリプタクトのヘルプ</span>
+      <a href="https://support.cryptact.com/hc/ja/articles/4413123225497" target="_blank" rel="noopener">カスタムコインの作り方↗</a>
+      <a href="https://support.cryptact.com/hc/ja/articles/48512489985177" target="_blank" rel="noopener">手動で取引を追加する方法↗</a>
+      <a href="https://support.cryptact.com/hc/ja/articles/5180166769561" target="_blank" rel="noopener">NFT取引の登録方法↗</a>
+      <a href="https://support.cryptact.com/hc/ja/articles/360002571312" target="_blank" rel="noopener">カスタムファイルの作り方↗</a>
+    </div>
+    <div class="vlist" id="list"></div>
+  </div>
+
+  <details class="help">
+    <summary>計算ルールと入力のしかた</summary>
+    <ul>
+      <li>各項目をクリックするとコピーできます。フォームの「価格参照をする」はOFFにし、決済通貨・手数料通貨は <code>XRP</code> を選んでください（円換算はクリプタクトが行います）。</li>
+      <li><b>価格</b>はxrp.cafeの履歴CSVの価格と同じになります。出品を買った場合は出品価格、オファー（入札）が承諾された場合とオークションは入札額です。</li>
+      <li><b>xrp.cafe手数料（1.589%）</b>：出品を買った場合は買い手が上乗せで払うため、<b>買い</b>の手数料に入ります。入札が承諾された場合やオークションは入札額から差し引かれるため、<b>売り</b>の手数料に入ります。</li>
+      <li><b>買い</b>の手数料 = （上乗せ分のxrp.cafe手数料）+ 自分が払ったネットワーク手数料（購入オファー作成分を含む）。</li>
+      <li><b>売り</b>の手数料 = （差し引かれたxrp.cafe手数料）+ ロイヤリティ + 自分が払ったネットワーク手数料（売りオファー作成分を含む）。</li>
+      <li><b>無償受取</b>：0 XRPで受け取ったNFT（無料ミント・エアドロップ・プレゼントなど）です。種類「ボーナス」、価格0、決済通貨JPYで入力し、手数料は入力しません。</li>
+      <li><b>主軸通貨</b>はクリプタクトのカスタムコインで使える文字（半角英大文字・数字・#）だけに変換しています（例: XRP Hugs65 → XRPHUGS65）。手動入力では「カスタムコイン/DeFiトークンを作成・利用する」をONにして、この文字列をそのまま入れます（USER- は自動で付きます）。CSVでは USER- を付けて出力します。日本語などを含む名前は、区別できるようにNFT IDの末尾を頭に付けます。</li>
+      <li><b>クリプタクト用CSV</b>は「入力済」にしていない行だけを出力します。手動入力とCSVアップロードで同じ取引を二重に登録しないためです。アップロードした後は、その行を「入力済」にしてください。</li>
+      <li><b>有料ミント</b>：xrp.cafeのローンチパッドでのミントです。XRPの送金（メモ「XRP for NFT mint by xrp.cafe」）と、その直後にxrp.cafeのミント用アカウントから0 XRPで届くNFTを組み合わせ、「買い」として表示します。価格は送金額 ÷ 届いた個数です。続けて何回か送金した場合は、合計額を個数で割り振ります。</li>
+      <li><b>ミント</b>：自分でミントしたNFTです。種類は「買い」、価格0で入力し、ミントのネットワーク手数料を手数料に入れます。</li>
+      <li><b>取得時（参考）</b>：売ったNFTをどう手に入れたかです。期間より前に取得したものは「取得原価がわからない場合」を押すと、必要な分だけ過去をさかのぼって調べます。</li>
+      <li>表示するのは「買い」「売り」「無償受取」「ミント」「有料ミント」だけです。送付・バーン・ロイヤリティ、約定しなかったオファーの手数料などは表示しません。</li>
+      <li>xrp.cafe経由かどうかは、ブローカーアカウント（売買 <code>rpx9JThQ2y37FaGeeJP7PXDUVEXY3PHZSC</code>、オークション <code>rKWCPCDKbn3cLRSFpUgqS5Nc3z3s6UUTu6</code>）か、メモに「xrp.cafe」が入っているかで判定しています。</li>
+      <li>データ元は公開XRPLノード（s2.ripple.com、つながらない場合はxrplcluster.com）です。税務上の最終判断はご自身または税理士の確認のうえで行ってください。</li>
+    </ul>
+  </details>
 </div>
 </main>
 
@@ -550,6 +586,8 @@ const MINT_PAY_MEMO=/NFT mint by xrp\.cafe/i;
 const MINT_PAY_LOOKBACK=86400; // payments this long before the range start can still pay for NFTs inside it
 const NFT_TYPES=new Set(["NFTokenMint","NFTokenAcceptOffer","NFTokenCreateOffer","NFTokenCancelOffer","NFTokenBurn","NFTokenModify"]);
 
+// 3-step strip markup: items {t,s,st} with st "done" (check mark) / "cur" (current) / "" (upcoming)
+const stepsHtml=l=>l.map((x,i)=>`<div class="step ${x.st}"><span class="sn">${x.st==="done"?"✓":i+1}</span><span><b>${x.t}</b><small>${x.s}</small></span></div>`).join("");
 const WSS=["wss://s2.ripple.com","wss://s1.ripple.com"];
 // A running fetch can be stopped from the UI: every wait and page boundary checks this flag
 const job={cancelled:false};
@@ -951,7 +989,22 @@ let state={rows:[],names:{},filter:"all",done:new Set(),checked:new Set()};
   try{Object.assign(state.names,JSON.parse(localStorage.getItem("nftx_names")||"{}"))}catch{}
   $("run").onclick=()=>busy?(job.cancelled=true,$("run").textContent="停止中…"):run();
   $("csvCustom").onclick=downloadCsv;
+  $("addr").addEventListener("input",cafeSteps);
+  $("addrPick").addEventListener("change",()=>setTimeout(cafeSteps)); // after the XRPL script copies the pick into the address
+  cafeSteps();
 })();
+// 3-step strip in the hero: address → fetch → enter one by one / CSV
+function cafeSteps(){
+  const ok=/^r[1-9A-HJ-NP-Za-km-z]{24,34}$/.test($("addr").value.trim()),got=!!state.range;
+  const d=v=>(v||"").replace(/-/g,"/"),{start,end}=state.range||{};
+  const per=got?`${d(start)}〜${start.slice(0,4)===end.slice(0,4)?d(end).slice(5):d(end)}`:"";
+  const left=state.rows.filter(r=>!state.done.has(r.hash+r.kind)).length;
+  $("cSteps").innerHTML=stepsHtml([
+    {t:"アドレスを選ぶ",s:ok?"入力済み":"アドレスを入れてください",st:ok?"done":"cur"},
+    {t:"期間を選んで抽出",s:got?per:"期間を選んで抽出",st:got?"done":ok?"cur":""},
+    {t:"1件ずつ入力、またはCSV",s:got?(state.rows.length?`${state.rows.length}件・未入力 ${left}件`:"該当する取引はありません"):"抽出すると一覧が出ます",st:got?"cur":""},
+  ]);
+}
 function save(){try{localStorage.setItem("nftx",JSON.stringify({addr:$("addr").value.trim(),done:[...state.done]}))}catch{}}
 
 function jst(ts,sep="-"){const d=new Date((ts+9*3600)*1000).toISOString();return d.slice(0,10).replaceAll("-",sep)+" "+d.slice(11,19)}
@@ -1187,6 +1240,7 @@ function render(){
     ["手数料合計","",fmt(rows.filter(r=>!noFee(r)&&(r.feeCcy||"XRP")==="XRP").reduce((s,r)=>s+r.fee,0))+" XRP"],
   ].map(([k,a,b])=>`<div class="stat"><small>${k}</small><b>${a||b}</b>${a&&b?`<span class="sub">${b}</span>`:""}</div>`).join("");
   $("rcount").textContent=`${rows.length}件`;
+  cafeSteps();
 
   const kinds=["all",...Object.keys(KIND).filter(k=>rows.some(r=>r.kind===k))];
   $("filters").innerHTML=kinds.map(k=>`<span class="filter ${state.filter===k?"on":""}" data-k="${k}">${k==="all"?"すべて":KIND[k].label} ${k==="all"?rows.length:rows.filter(r=>r.kind===k).length}</span>`).join("")
@@ -1240,6 +1294,7 @@ function render(){
     el.checked?state.done.add(el.dataset.done):state.done.delete(el.dataset.done);save();
     el.closest(".tx").classList.toggle("done",el.checked);
     $("csvCustom").textContent=`クリプタクト用CSV（未入力 ${state.rows.filter(r=>!state.done.has(r.hash+r.kind)).length}件）`;
+    cafeSteps();
   });
 }
 function commentOf(r){
@@ -1332,7 +1387,7 @@ function loadWallets(){
   XS.wallets=store.get("xtax_wallets",[]);
   if(!XS.wallets.length){const nft=store.get("nftx",{});XS.wallets=[{label:"メイン",address:nft.addr||"",tag:""}]}
 }
-function saveWallets(){store.set("xtax_wallets",XS.wallets);fillCafePick()}
+function saveWallets(){store.set("xtax_wallets",XS.wallets);fillCafePick();updateSteps()}
 function renderWallets(){
   $("wlist").innerHTML=XS.wallets.map((w,i)=>`<div class="wrow" data-i="${i}">
     <input class="wl" placeholder="名前（例: メイン）" value="${esc(w.label)}">
@@ -2414,13 +2469,38 @@ function downloadCsv(){
   const a=document.createElement("a");a.href=URL.createObjectURL(blob);
   a.download=`xrpl_tax_${fileRange(rows)}.csv`;a.click();
 }
-// "CSVに出力: N行（期間）" — rows the CSV will contain (checked, and priced where a price is needed); period of the fetch
-function selCount(){
-  const n=(XS.rows||[]).filter(r=>r.checked&&!(r.needPrice&&!r.price)).length;
+// rows the CSV will contain: checked, and priced where a price is needed
+const csvCount=()=>(XS.rows||[]).filter(r=>r.checked&&!(r.needPrice&&!r.price)).length;
+// the fetched period as "2026/10/01〜10/31" (same year: the end drops it)
+function rangeText(){
   const d=v=>v?v.replace(/-/g,"/"):"",{start,end}=XS.range||{};
   const endTxt=start&&end&&start.slice(0,4)===end.slice(0,4)?d(end).slice(5):d(end);
-  const range=start||end?`${d(start)||"最初"}〜${endTxt||"最新"}`:"全期間";
-  $("xSelCount").textContent=`CSVに出力: ${n.toLocaleString()}行（${range}）`;
+  return start||end?`${d(start)||"最初"}〜${endTxt||"最新"}`:"全期間";
+}
+// "CSVに出力: N行（期間）"; the banner and the step strip follow the same number
+function selCount(){
+  $("xSelCount").textContent=`CSVに出力: ${csvCount().toLocaleString()}行（${rangeText()}）`;
+  updateSteps();updateNext();
+}
+// 3-step strip in the hero: wallets → fetch → check / CSV
+function updateSteps(){
+  const n=XS.wallets.filter(w=>validAddr(w.address)&&!w.tag).length,got=!!XS.range&&!!(XS.rows||[]).length;
+  const rv=(XS.rows||[]).filter(r=>r.status==="review").length;
+  $("xSteps").innerHTML=stepsHtml([
+    {t:"ウォレットを登録",s:n?`${n}件 登録済み`:"まだ登録がありません",st:n?"done":"cur"},
+    {t:"期間を選んで取得",s:XS.range?rangeText():"期間を選んで取得",st:XS.range?"done":n?"cur":""},
+    {t:"確認してCSV",s:got?`要確認 ${rv}件・CSVに出力 ${csvCount().toLocaleString()}行`:XS.range?"該当する取引はありません":"取得すると表が出ます",st:XS.range?"cur":""},
+  ]);
+}
+// next-action banner above the results: review rows first, then the CSV
+function updateNext(){
+  const rows=XS.rows||[],rv=rows.filter(r=>r.status==="review").length,n=csvCount(),btn=$("xNextBtn");
+  $("xNext").hidden=!rows.length;
+  $("xNext").classList.toggle("review",rv>0);
+  XS.nextAct=rv?"review":n?"csv":"";
+  $("xNextMsg").textContent=rv?`要確認が${rv}件あります。内容を見てActionや価格を決めてください`:n?`確認が済みました。CSVに出力: ${n.toLocaleString()}行`:"CSVに出力する行はありません";
+  btn.hidden=!XS.nextAct;
+  btn.textContent=rv?"要確認を見る":"CSVダウンロード";
 }
 // yymmdd_yymmdd from the fetched period; an open end falls back to the first/last exported row
 function fileRange(rows){
@@ -2431,7 +2511,7 @@ function fileRange(rows){
 }
 
 // ---------- init ----------
-loadWallets();renderWallets();fillCafePick();
+loadWallets();renderWallets();fillCafePick();updateSteps();
 XS.fxrpMode=store.get("xtax_fxrp_mode","same");
 $("xFxrpMode").value=XS.fxrpMode;
 XS.nft=!!store.get("xtax_nft",false);$("xNft").checked=XS.nft;
@@ -2459,6 +2539,7 @@ $("wImport").onchange=e=>{if(e.target.files[0])importWallets(e.target.files[0]);
 $("xRun").onclick=run;
 $("xStop").onclick=stop;
 $("xCsv").onclick=downloadCsv;
+$("xNextBtn").onclick=()=>XS.nextAct==="review"?$("xSeg").querySelector('[data-f="review"]').click():downloadCsv();
 $("xShowClosed").onchange=renderLedger;
 $("xWalletFilter").onchange=e=>{XS.wfilter=e.target.value;render();toListTop()};
 $("xWfClear").onclick=()=>{XS.wfilter="";render();toListTop()};
@@ -2509,6 +2590,7 @@ const pick=$("addrPick");if(pick)pick.onchange=()=>{if(pick.value)$("addr").valu
   }
   document.getElementById("tabXrpl").onclick=()=>show("xrpl");
   document.getElementById("tabCafe").onclick=()=>show("cafe");
+  document.querySelectorAll(".tabcard").forEach(b=>b.onclick=()=>document.getElementById(b.dataset.go==="cafe"?"tabCafe":"tabXrpl").click());
   let key=location.hash.slice(1);
   if(!tabs[key]){try{key=localStorage.getItem("xtax_tab")}catch{}}
   show(tabs[key]?key:"xrpl");
